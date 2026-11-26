@@ -154,32 +154,32 @@ struct PanelView: View {
 
     // MARK: Body Battery
 
+    /// 0.2 (his pick C3): the name with the number right beside it, the small words at the right, and under
+    /// them a wide curve of the day with the hours.
     private var bodyCard: some View {
         let shown = model.body
         let today = DayKey.of(model.now)
         let start = DayKey.start(of: today)?.timeIntervalSince1970 ?? 0
-        return VStack(alignment: .leading, spacing: 1) {
-            HStack(alignment: .center, spacing: 6) {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Body Battery").font(.caption.weight(.semibold))
-                    Text(Words.number(shown.latest)).font(.system(size: 30, weight: .bold)).monospacedDigit()
-                        .accessibilityIdentifier("bodyNumber")
-                }
-                Spacer(minLength: 0)
-                if !shown.today.isEmpty || !shown.yesterday.isEmpty {
-                    BodyCurveView(today: BodyCurve.spots(shown.today, dayStart: start),
-                                  yesterday: BodyCurve.spots(shown.yesterday, dayStart: start - 86_400),
-                                  plum: Palette.yesterday(scheme))
-                        .frame(width: 168, height: 50)
-                }
+        return VStack(alignment: .leading, spacing: 3) {
+            HStack(alignment: .firstTextBaseline, spacing: 7) {
+                Text("Body Battery").font(.caption.weight(.semibold))
+                Text(Words.number(shown.latest)).font(.system(size: 24, weight: .bold)).monospacedDigit()
+                    .accessibilityIdentifier("bodyNumber")
+                Spacer(minLength: 4)
+                Text(shown.smallWords(now: model.now)).font(.caption2).opacity(0.88).lineLimit(1).minimumScaleFactor(0.8)
+                    .accessibilityIdentifier("bodyWords")
             }
-            // Under the number, across the whole card: the words never push the card wider than the panel.
-            Text(shown.smallWords(now: model.now)).font(.caption2).opacity(0.88).lineLimit(1)
-                .accessibilityIdentifier("bodyWords")
+            if !shown.today.isEmpty || !shown.yesterday.isEmpty {
+                BodyCurveView(today: BodyCurve.spots(shown.today, dayStart: start),
+                              yesterday: BodyCurve.spots(shown.yesterday, dayStart: start - 86_400),
+                              plum: Palette.yesterday(scheme))
+                    .frame(height: 74)
+            }
         }
         .foregroundStyle(Color.white)
         .padding(.horizontal, 10)
-        .padding(.vertical, 8)
+        .padding(.top, 6)
+        .padding(.bottom, 7)
         .background(Palette.bodyFill(scheme), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
         .padding(.top, 3)
         .accessibilityElement(children: .combine)
@@ -203,27 +203,43 @@ struct PanelView: View {
     }
 }
 
-/// The small curve on the Body Battery card: today as a white line with a dot at the newest reading,
-/// yesterday as a thin dark line with its word. Midnight to midnight, 0 at the bottom, 100 at the top.
+/// The curve on the Body Battery card: today as a white line with a dot at the newest reading and a soft
+/// fill under it, yesterday as a thin dark line with its word. Midnight to midnight with the hours 06, 12, 18
+/// under it; 0 at the bottom line, 100 at the top.
 struct BodyCurveView: View {
     let today: [BodyCurve.Spot]
     let yesterday: [BodyCurve.Spot]
     let plum: Color
 
+    /// Room under the curve for the hour marks and their figures.
+    private let foot: CGFloat = 14
+
     var body: some View {
         GeometryReader { room in
             let size = room.size
             ZStack(alignment: .topLeading) {
-                line(yesterday, in: size).stroke(plum, style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
+                area(today, in: size).fill(Color.white.opacity(0.22))
+                line(yesterday, in: size).stroke(plum, style: StrokeStyle(lineWidth: 1.3, lineCap: .round, lineJoin: .round))
                 line(today, in: size).stroke(Color.white, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
                 if let last = today.last {
-                    Circle().fill(Color.white).frame(width: 6.4, height: 6.4)
+                    Circle().fill(Color.white).frame(width: 6.6, height: 6.6)
                         .position(place(last, in: size))
                 }
                 if let spot = wordSpot {
                     Text("yesterday").font(.system(size: 9, weight: .semibold)).foregroundStyle(plum).fixedSize()
                         .position(x: min(max(place(spot, in: size).x, 24), size.width - 24),
-                                  y: max(place(spot, in: size).y - 11, 6))
+                                  y: max(place(spot, in: size).y - 9, 6))
+                }
+                ForEach([6, 12, 18], id: \.self) { hour in
+                    let x = 3 + CGFloat(hour) / 24 * (size.width - 6)
+                    Path { path in
+                        path.move(to: CGPoint(x: x, y: size.height - foot))
+                        path.addLine(to: CGPoint(x: x, y: size.height - foot + 3))
+                    }
+                    .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                    Text(String(format: "%02d", hour)).font(.system(size: 8.5)).monospacedDigit().foregroundStyle(Color.white.opacity(0.85))
+                        .fixedSize()
+                        .position(x: x, y: size.height - 4.5)
                 }
             }
         }
@@ -238,7 +254,8 @@ struct BodyCurveView: View {
     }
 
     private func place(_ spot: BodyCurve.Spot, in size: CGSize) -> CGPoint {
-        CGPoint(x: 3 + spot.x * (size.width - 6), y: size.height - 4 - spot.y * (size.height - 10))
+        let base = size.height - foot
+        return CGPoint(x: 3 + spot.x * (size.width - 6), y: base - spot.y * (base - 5))
     }
 
     private func line(_ spots: [BodyCurve.Spot], in size: CGSize) -> Path {
@@ -246,6 +263,17 @@ struct BodyCurveView: View {
         guard spots.count > 1 else { return path }
         path.move(to: place(spots[0], in: size))
         for spot in spots.dropFirst() { path.addLine(to: place(spot, in: size)) }
+        return path
+    }
+
+    /// The ground under today's line, down to the bottom line.
+    private func area(_ spots: [BodyCurve.Spot], in size: CGSize) -> Path {
+        var path = line(spots, in: size)
+        guard let first = spots.first, let last = spots.last, spots.count > 1 else { return Path() }
+        let base = size.height - foot
+        path.addLine(to: CGPoint(x: place(last, in: size).x, y: base))
+        path.addLine(to: CGPoint(x: place(first, in: size).x, y: base))
+        path.closeSubpath()
         return path
     }
 }

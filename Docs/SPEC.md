@@ -27,7 +27,7 @@ A small hand-drawn mark and a number.
 3. If there is no note for today, grey words say why: "No note for today yet. Triathlon writes it when it opens.", or "AMS Triathlon Training is not on this Mac.", or that the Mac did not let the app read the note (allow it in System Settings, Privacy & Security), or that the note is newer than this version understands.
 4. "Tomorrow" (blue heading): tomorrow's first session, for example "Bike, 1 h 10 min", or "Rest day". Missing when nothing is planned.
 5. "This week" (purple heading): for example "40 min done of 3 h 35 min planned", and a slim purple bar filled to that share (done divided by planned, limited to 0 to 1; no bar when nothing is planned).
-6. Body Battery card (raspberry, filled, white words): "Body Battery", the number large, small words "watch synced 15:09" (the watch's last sync; with the weekday, for example "watch synced Mon 15:09", when it was not today), and a small curve. Today is a white line with a dot at the newest reading. Yesterday is a thin dark plum line with the word "yesterday". The curve runs from midnight to midnight. It is only as fine as the watch's syncs: a few readings a day give a line with few corners.
+6. Body Battery card (raspberry, filled, white words; look C3 since 0.2). Top line: "Body Battery" with the number (24 points, bold) right beside it, and at the right the small words "watch synced 15:09" (the watch's last sync; with the weekday, for example "watch synced Mon 15:09", when it was not today). Under it a curve as wide as the card, 74 points tall: today is a white line (2.2) with a dot at the newest reading and a soft white fill (22 %) under it down to the bottom line; yesterday is a thin dark plum line (1.3) with the word "yesterday". The curve runs from midnight to midnight; the bottom line is 0, the top 100; small marks and the figures 06, 12 and 18 under it are the hours. It is only as fine as the watch's syncs. With no reading at all the curve is left out.
 7. One full-colour green main button "Open Triathlon". It brings the Triathlon app to the front (`amsworkoutsync://today`).
 
 There is no "done" button. Triathlon cannot log a session on the Mac (only the iPhone logs), so a click only opens the session.
@@ -120,7 +120,8 @@ Ten small rule tests in `Core/Tests/TriaMenuCoreTests/RulesTests.swift` (all val
 
 ## Version history
 
-- 0.1 (1), 26 Nov 2026: first version, as described above.
+- 0.2 (2), 26 Nov 2026: the Body Battery card in look C3 (his pick from one picture with numbered options; he kept the menu bar item and the session rows as they were): number beside the name, wide curve with a soft fill under today and the hours 06, 12, 18. In 0.1 the number stood large on the left with a small curve (150 by 62 points) beside it.
+- 0.1 (1), 26 Nov 2026: first version.
 
 ## Checks from outside (for whoever maintains it)
 
