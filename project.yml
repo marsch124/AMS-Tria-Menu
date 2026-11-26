@@ -1,0 +1,56 @@
+name: AMSTriaMenu
+options:
+  bundleIdPrefix: com.schabbauer
+  deploymentTarget:
+    macOS: "15.0"
+  createIntermediateGroups: true
+packages:
+  TriaMenuCore:
+    path: Core
+  # The central icon library: the sport marks are the same drawings as in AMS Triathlon Training.
+  AMSIcons:
+    url: https://github.com/marsch124/AMS-Icons
+    revision: 2c5c095593a9d1367f745beabbfa69a02bd355c0
+targets:
+  AMSTriaMenu:
+    type: application
+    platform: macOS
+    sources:
+      - App/Sources
+      - path: App/Resources
+        excludes:
+          - AppIcon.icns
+    info:
+      path: App/Config/Info.plist
+      properties:
+        CFBundleDisplayName: AMS Tria Menu
+        CFBundleShortVersionString: "0.1"
+        CFBundleVersion: "1"
+        CFBundleIconFile: AppIcon
+        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.healthcare-fitness
+        # The Garmin Board answers on this Mac only, over plain http.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+    settings:
+      base:
+        PRODUCT_NAME: AMS Tria Menu
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        PRODUCT_BUNDLE_IDENTIFIER: com.schabbauer.AMSTriaMenu
+        SWIFT_VERSION: "5.0"
+        MARKETING_VERSION: "0.1"
+        CURRENT_PROJECT_VERSION: "1"
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: Apple Development
+        DEVELOPMENT_TEAM: D24ENP83QQ
+        ENABLE_HARDENED_RUNTIME: NO
+    dependencies:
+      - package: TriaMenuCore
+      - package: AMSIcons
+schemes:
+  AMS Tria Menu:
+    build:
+      targets:
+        AMSTriaMenu: all
+    run:
+      config: Release

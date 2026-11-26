@@ -1,0 +1,422 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01E03E355379C877CF3DDEF9 /* TriaMenuCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5FC83C7BC0D99432252AF078 /* TriaMenuCore */; };
+		3E43D46EA3CAB8156D6D13D1 /* Icons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D149A7C12DA73D9012EA667 /* Icons.swift */; };
+		44F697BFC1787EC1717183A2 /* AMSIcons in Frameworks */ = {isa = PBXBuildFile; productRef = 52F549BFCF4849139E66AD44 /* AMSIcons */; };
+		47EBEBCD6FC5C574E8B38D8A /* PanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77D5946D4C08C54868E09F7C /* PanelView.swift */; };
+		59CB5F650EA936803E7C2A25 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 087158F99F3CE4FE198A39C9 /* AppDelegate.swift */; };
+		6BAD7737287F22D878EAD885 /* Guide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A1EA35FE6E01FB3112AE591 /* Guide.swift */; };
+		820B373352D0D7523C67BC88 /* StatusItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51338C326ADA84187652680 /* StatusItemController.swift */; };
+		8D3BD956193ACD36AE822033 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 6B44D0AD978EA69ABCF78DE3 /* AppIcon.icon */; };
+		A0F5EBDC4166D743E4E67313 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACAF2EA9A3A39255C9E90C4 /* SettingsView.swift */; };
+		AB31993F55CD688EC4864046 /* Diary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C5E77898B10F66EA5BEC614 /* Diary.swift */; };
+		C2D0592B420E8A19DC48D171 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 085F24AE917198E2AA13DE08 /* AppModel.swift */; };
+		F944379B31AA9C6B00605D2D /* Keeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E84C2A210B102957E19DAD2 /* Keeper.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		085F24AE917198E2AA13DE08 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		087158F99F3CE4FE198A39C9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		1C5E77898B10F66EA5BEC614 /* Diary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diary.swift; sourceTree = "<group>"; };
+		4D149A7C12DA73D9012EA667 /* Icons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Icons.swift; sourceTree = "<group>"; };
+		6B44D0AD978EA69ABCF78DE3 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		77D5946D4C08C54868E09F7C /* PanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelView.swift; sourceTree = "<group>"; };
+		9A1EA35FE6E01FB3112AE591 /* Guide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Guide.swift; sourceTree = "<group>"; };
+		9E84C2A210B102957E19DAD2 /* Keeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keeper.swift; sourceTree = "<group>"; };
+		C1961269A8D63C6209704257 /* AMSTriaMenu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AMSTriaMenu.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DACAF2EA9A3A39255C9E90C4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F51338C326ADA84187652680 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
+		FADBF164510017FC9D3C6767 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CB3B97FDB23BF37C0B884EAD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				01E03E355379C877CF3DDEF9 /* TriaMenuCore in Frameworks */,
+				44F697BFC1787EC1717183A2 /* AMSIcons in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		020C5254B9DA41CA1DDA2DBC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C1961269A8D63C6209704257 /* AMSTriaMenu.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3A380B4D1A1838878020EC57 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				087158F99F3CE4FE198A39C9 /* AppDelegate.swift */,
+				085F24AE917198E2AA13DE08 /* AppModel.swift */,
+				1C5E77898B10F66EA5BEC614 /* Diary.swift */,
+				9A1EA35FE6E01FB3112AE591 /* Guide.swift */,
+				4D149A7C12DA73D9012EA667 /* Icons.swift */,
+				9E84C2A210B102957E19DAD2 /* Keeper.swift */,
+				77D5946D4C08C54868E09F7C /* PanelView.swift */,
+				DACAF2EA9A3A39255C9E90C4 /* SettingsView.swift */,
+				F51338C326ADA84187652680 /* StatusItemController.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		8E88B6E19FF227F9F200D7D2 = {
+			isa = PBXGroup;
+			children = (
+				B09F6CF3E942F8D74AD0C860 /* App */,
+				DB5D1F135B802C29BC0B5565 /* Packages */,
+				020C5254B9DA41CA1DDA2DBC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B09F6CF3E942F8D74AD0C860 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				E295B26EC91F35CC375119F4 /* Resources */,
+				3A380B4D1A1838878020EC57 /* Sources */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		DB5D1F135B802C29BC0B5565 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				FADBF164510017FC9D3C6767 /* Core */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		E295B26EC91F35CC375119F4 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				6B44D0AD978EA69ABCF78DE3 /* AppIcon.icon */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AEC84AE9410BB8384A6D0A3A /* AMSTriaMenu */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AD6A0718B1E1DE8DEEC99C00 /* Build configuration list for PBXNativeTarget "AMSTriaMenu" */;
+			buildPhases = (
+				499504D93D3E9E12984770E0 /* Sources */,
+				56AE6E4CB3973DF859DE47F1 /* Resources */,
+				CB3B97FDB23BF37C0B884EAD /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AMSTriaMenu;
+			packageProductDependencies = (
+				5FC83C7BC0D99432252AF078 /* TriaMenuCore */,
+				52F549BFCF4849139E66AD44 /* AMSIcons */,
+			);
+			productName = AMSTriaMenu;
+			productReference = C1961269A8D63C6209704257 /* AMSTriaMenu.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AC3D246BD2C487F5394139E1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					AEC84AE9410BB8384A6D0A3A = {
+						DevelopmentTeam = D24ENP83QQ;
+						ProvisioningStyle = Manual;
+					};
+				};
+			};
+			buildConfigurationList = B433803E95711C2D123087FE /* Build configuration list for PBXProject "AMSTriaMenu" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 8E88B6E19FF227F9F200D7D2;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				38BBDC9123F30334BEB2E7EB /* XCRemoteSwiftPackageReference "AMS-Icons" */,
+				08A7C238B73B784DEE81A3A6 /* XCLocalSwiftPackageReference "Core" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 020C5254B9DA41CA1DDA2DBC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AEC84AE9410BB8384A6D0A3A /* AMSTriaMenu */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		56AE6E4CB3973DF859DE47F1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D3BD956193ACD36AE822033 /* AppIcon.icon in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		499504D93D3E9E12984770E0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				59CB5F650EA936803E7C2A25 /* AppDelegate.swift in Sources */,
+				C2D0592B420E8A19DC48D171 /* AppModel.swift in Sources */,
+				AB31993F55CD688EC4864046 /* Diary.swift in Sources */,
+				6BAD7737287F22D878EAD885 /* Guide.swift in Sources */,
+				3E43D46EA3CAB8156D6D13D1 /* Icons.swift in Sources */,
+				F944379B31AA9C6B00605D2D /* Keeper.swift in Sources */,
+				47EBEBCD6FC5C574E8B38D8A /* PanelView.swift in Sources */,
+				A0F5EBDC4166D743E4E67313 /* SettingsView.swift in Sources */,
+				820B373352D0D7523C67BC88 /* StatusItemController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		6ECBCAE059903FB66B23DDB6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A0ECA7A7C94CEFF4869BBDE4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D24ENP83QQ;
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = App/Config/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.schabbauer.AMSTriaMenu;
+				PRODUCT_NAME = "AMS Tria Menu";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		A1202A07C1E840BEA402C0B6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D24ENP83QQ;
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = App/Config/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.schabbauer.AMSTriaMenu;
+				PRODUCT_NAME = "AMS Tria Menu";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		E7758B57CBA9CBCB97A2420F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AD6A0718B1E1DE8DEEC99C00 /* Build configuration list for PBXNativeTarget "AMSTriaMenu" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1202A07C1E840BEA402C0B6 /* Debug */,
+				A0ECA7A7C94CEFF4869BBDE4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B433803E95711C2D123087FE /* Build configuration list for PBXProject "AMSTriaMenu" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6ECBCAE059903FB66B23DDB6 /* Debug */,
+				E7758B57CBA9CBCB97A2420F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		08A7C238B73B784DEE81A3A6 /* XCLocalSwiftPackageReference "Core" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Core;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		38BBDC9123F30334BEB2E7EB /* XCRemoteSwiftPackageReference "AMS-Icons" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/marsch124/AMS-Icons";
+			requirement = {
+				kind = revision;
+				revision = 2c5c095593a9d1367f745beabbfa69a02bd355c0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		52F549BFCF4849139E66AD44 /* AMSIcons */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 38BBDC9123F30334BEB2E7EB /* XCRemoteSwiftPackageReference "AMS-Icons" */;
+			productName = AMSIcons;
+		};
+		5FC83C7BC0D99432252AF078 /* TriaMenuCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TriaMenuCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = AC3D246BD2C487F5394139E1 /* Project object */;
+}
