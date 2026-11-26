@@ -3,7 +3,8 @@ import Combine
 import SwiftUI
 import TriaMenuCore
 
-/// The item in the menu bar: the mark of today's session and the Body Battery number, and the panel under it.
+/// The item in the menu bar: one icon, the training wave of AMS Triathlon Training's app icon (0.3, his own
+/// pick: "make it like this"), and the panel under it. Green while the app has today's note, grey without.
 final class StatusItemController: NSObject, NSPopoverDelegate {
     private var item: NSStatusItem!
     private var placeTimer: Timer?
@@ -13,8 +14,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
     private let popover = NSPopover()
     private let model: AppModel
     private var bag = Set<AnyCancellable>()
-    private var drawnFace: Face?
-    private var drawnNumber: String?
+    private var drawnKnown: Bool?
     /// The app that had the keyboard when the panel opened; it gets it back when the panel closes.
     private var previousApp: NSRunningApplication?
     private var outsideClicks: Any?
@@ -53,9 +53,9 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         placeTimer.tolerance = 1
         RunLoop.main.add(placeTimer, forMode: .common)
         self.placeTimer = placeTimer
-        // Every redraw of a menu bar item costs the Mac a little, so it is drawn only when the mark or the
-        // number really changes.
-        model.$face.map { _ in () }.merge(with: model.$body.map { _ in () }, model.$note.map { _ in () })
+        // Every redraw of a menu bar item costs the Mac a little, so it is drawn only when it turns from
+        // green to grey or back; the words under the pointer follow every reading.
+        model.$body.map { _ in () }.merge(with: model.$note.map { _ in () })
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.redraw(force: false) }
             .store(in: &bag)
@@ -75,7 +75,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
             button.target = self
             button.action = #selector(clicked)
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-            button.imagePosition = .imageLeading
+            button.imagePosition = .imageOnly
             button.setAccessibilityIdentifier("triaMenuStatusItem")
         }
     }
@@ -184,40 +184,21 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         let words = Words.hover(note: model.note, battery: model.body.latest)
         if button.toolTip != words { button.toolTip = words }
         button.setAccessibilityLabel(words.replacingOccurrences(of: "\n", with: ". "))
-        let face = model.face
-        let number = Words.number(model.body.latest)
-        if force || drawnFace != face {
-            drawnFace = face
-            button.image = Self.image(face)
-        }
-        if force || drawnNumber != number {
-            drawnNumber = number
-            // No colour of its own: the Mac draws it black or white like the clock beside it.
-            button.attributedTitle = NSAttributedString(string: number, attributes: [
-                .font: NSFont.monospacedDigitSystemFont(ofSize: 13, weight: .medium),
-                .baselineOffset: -0.5,
-            ])
-        }
+        let known = model.note != nil
+        guard force || drawnKnown != known else { return }
+        drawnKnown = known
+        button.image = Self.image(known: known)
     }
 
-    static func look(_ face: Face) -> (mark: Mark, colour: NSColor) {
-        switch face {
-        case .toDo(let sport): return (.sport(sport), Sport.inkNS(sport))
-        case .done: return (.tick, Palette.tickNS)
-        case .rest: return (.moon, Palette.moonNS)
-        case .grey(let sport): return (sport.map { .sport($0) } ?? .medal, Palette.greyNS)
-        }
-    }
-
-    /// The mark for the menu bar. Its colour settles when the Mac draws it, so one picture is right by day
-    /// and by night.
-    static func image(_ face: Face) -> NSImage {
-        let side: CGFloat = 18
-        let look = look(face)
-        let image = NSImage(size: NSSize(width: side, height: side), flipped: false) { rect in
+    /// The wave for the menu bar. Its colour settles when the Mac draws it, so one picture is right by day
+    /// and by night. A little wider than tall, like the wave itself.
+    static func image(known: Bool) -> NSImage {
+        let side: CGFloat = 20
+        let image = NSImage(size: NSSize(width: side, height: 18), flipped: false) { rect in
             guard let context = NSGraphicsContext.current?.cgContext else { return false }
-            // A slightly heavier line than in the panel, so the small mark stays clear.
-            look.mark.draw(in: rect.insetBy(dx: 0.5, dy: 0.5), color: look.colour, context: context, stroke: 2.0)
+            // A heavier line than in the panel: the wave of the app icon is a bold one.
+            Mark.wave.draw(in: CGRect(x: 0, y: (rect.height - side) / 2, width: side, height: side),
+                           color: known ? Palette.waveNS : Palette.greyNS, context: context, stroke: 2.3)
             return true
         }
         image.isTemplate = false

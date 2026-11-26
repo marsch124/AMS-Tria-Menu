@@ -36,7 +36,6 @@ final class AppModel: ObservableObject {
     @Published private(set) var note: TodayNote?
     @Published private(set) var noNote: NoNote? = .missing
     @Published private(set) var body: BodyShown = .empty
-    @Published private(set) var face: Face = .grey(sport: nil)
     @Published private(set) var boardAnswered: Date?
     @Published private(set) var busy = false
     @Published var quietOn: Bool {
@@ -147,8 +146,6 @@ final class AppModel: ObservableObject {
         }
         if note != fresh { note = fresh }
         if noNote != why { noNote = why }
-        let mark = Face.of(fresh)
-        if face != mark { face = mark }
         // A new day: yesterday's Body Battery is not today's.
         if shownDay != today {
             let first = shownDay.isEmpty
@@ -309,7 +306,7 @@ final class AppModel: ObservableObject {
         while Date() < until, model.noteBusy || model.boardBusy {
             RunLoop.main.run(until: Date().addingTimeInterval(0.2))
         }
-        var lines = ["mark: \(model.face)", "number: \(Words.number(model.body.latest))"]
+        var lines = ["wave: \(model.note != nil ? "green" : "grey")", "body battery: \(Words.number(model.body.latest))"]
         if let note = model.note {
             lines.append("day: \(note.day) · sessions: " + note.sessions.map { "\($0.sport)/\($0.state.rawValue)" }.joined(separator: ", "))
             lines.append("tomorrow: \(note.tomorrow ?? "none") · week: \(note.week ?? "none")")
@@ -368,7 +365,6 @@ final class AppModel: ObservableObject {
         }
         model.note = note
         model.noNote = nil
-        model.face = Face.of(note)
         model.body = body
         return model
     }

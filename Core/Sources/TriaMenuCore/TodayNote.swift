@@ -127,26 +127,6 @@ public enum NoNote: Equatable {
     }
 }
 
-/// What the mark in the menu bar is.
-public enum Face: Equatable {
-    /// A session is still to do: that sport's mark, in the sport's colour.
-    case toDo(sport: String)
-    /// Nothing left to do and at least one session done: the green tick.
-    case done
-    /// A rest day (or nothing planned): the moon.
-    case rest
-    /// Grey: no note for today (sport nil), or today's session was missed.
-    case grey(sport: String?)
-
-    public static func of(_ note: TodayNote?) -> Face {
-        guard let note else { return .grey(sport: nil) }
-        if let next = note.sessions.first(where: { $0.state == .todo }) { return .toDo(sport: next.sport) }
-        if note.sessions.contains(where: { $0.state == .done }) { return .done }
-        if let missed = note.sessions.first(where: { $0.state == .missed }) { return .grey(sport: missed.sport) }
-        return .rest
-    }
-}
-
 public enum Words {
     /// "Run 45 min": the length right beside the sport.
     public static func session(_ session: TodayNote.Session) -> String {

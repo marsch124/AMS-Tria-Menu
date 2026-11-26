@@ -6,7 +6,7 @@ import TriaMenuCore
 /// The hand-drawn marks, all from the central icon library (AMS-Icons): a 24-point grid, one 1.9 stroke,
 /// round ends, no fill. The sport marks are AMS Triathlon Training's own, so both apps show the same drawing.
 enum Mark: Equatable {
-    case sport(String), tick, moon, medal, gear
+    case sport(String), tick, moon, medal, gear, wave
 
     /// The drawing as path data on the 24-point grid.
     var d: String {
@@ -16,6 +16,8 @@ enum Mark: Equatable {
         case .moon: return AppMark.moon.path
         case .medal: return IconLibrary.handIcon("triathlon")?.path ?? AppMark.triRace.path
         case .gear: return ControlMark.settings.path
+        // The training wave: the line of AMS Triathlon Training's app icon.
+        case .wave: return AppMark.trainingWave.path
         }
     }
 
@@ -133,14 +135,12 @@ enum Palette {
     static func yesterday(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0x45082A : 0x4E0A2C) }
     static func pale(_ color: Color, _ scheme: ColorScheme) -> Color { color.opacity(scheme == .dark ? 0.22 : 0.14) }
 
-    /// The green tick in the menu bar.
-    static let tickNS = NSColor(name: nil) { appearance in
+    /// The wave in the menu bar while the app has today's note: the green of Triathlon's app icon.
+    static let waveNS = NSColor(name: nil) { appearance in
         appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-            ? NSColor(srgbRed: 0, green: 0.79, blue: 0.48, alpha: 1) : NSColor(srgbRed: 0, green: 0.47, blue: 0.31, alpha: 1)
+            ? NSColor(srgbRed: 0.004, green: 0.79, blue: 0.48, alpha: 1) : NSColor(srgbRed: 0, green: 0.53, blue: 0.35, alpha: 1)
     }
-    /// The moon of a rest day: slate.
-    static let moonNS = Sport.inkNS("rest")
-    /// Grey: no note for today, or a missed session.
+    /// Grey: no note for today.
     static let greyNS = NSColor(name: nil) { appearance in
         appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(white: 0.66, alpha: 1) : NSColor(white: 0.45, alpha: 1)
     }

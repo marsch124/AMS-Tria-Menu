@@ -171,18 +171,9 @@ enum Snapshots {
             save(SettingsView(model: .sample(.toDo), scrolls: false, startTab: .news).frame(height: 900).background(back)
                     .environment(\.colorScheme, scheme), folder.appendingPathComponent("settings-news-whole-\(tag).png"))
             let dark = scheme == .dark
-            let faces: [(String, Face, Int?)] = [("todo-run", .toDo(sport: "run"), 44), ("todo-swim", .toDo(sport: "swim"), 80),
-                                                  ("todo-bike", .toDo(sport: "bike"), 9), ("todo-strength", .toDo(sport: "strength"), 100),
-                                                  ("done", .done, 38), ("rest", .rest, 71), ("missed", .grey(sport: "bike"), 55),
-                                                  ("no-note", .grey(sport: nil), nil)]
-            save(HStack(spacing: 14) {
-                ForEach(Array(faces.enumerated()), id: \.offset) { _, face in
-                    HStack(spacing: 3) {
-                        Image(nsImage: settled(StatusItemController.image(face.1), dark: dark))
-                        Text(Words.number(face.2)).font(.system(size: 13, weight: .medium)).monospacedDigit()
-                            .foregroundStyle(dark ? Color.white : Color.black)
-                    }
-                }
+            save(HStack(spacing: 18) {
+                Image(nsImage: settled(StatusItemController.image(known: true), dark: dark))
+                Image(nsImage: settled(StatusItemController.image(known: false), dark: dark))
             }
             .padding(.horizontal, 12).padding(.vertical, 4)
             .background(dark ? Color(white: 0.2) : Color(white: 0.88)), folder.appendingPathComponent("menubar-\(tag).png"))

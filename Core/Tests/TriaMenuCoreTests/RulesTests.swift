@@ -46,19 +46,6 @@ final class RulesTests: XCTestCase {
         XCTAssertEqual(DayKey.before("2026-12-01", calendar: calendar), "2026-11-30")
     }
 
-    func testTheMarkInTheMenuBar() {
-        XCTAssertEqual(Face.of(nil), .grey(sport: nil))
-        XCTAssertEqual(Face.of(note()), .toDo(sport: "run"), "the first session still to do, though it is second in time")
-        var done = note()!
-        done.sessions[0].state = .done
-        XCTAssertEqual(Face.of(done), .done)
-        let rest = TodayNote(day: "2026-12-01", sessions: [.init(key: "r", sport: "rest", sportWord: "Rest", state: .rest)])
-        XCTAssertEqual(Face.of(rest), .rest)
-        let missed = TodayNote(day: "2026-12-01", sessions: [.init(key: "m", sport: "bike", sportWord: "Bike", state: .missed)])
-        XCTAssertEqual(Face.of(missed), .grey(sport: "bike"))
-        XCTAssertEqual(Face.of(TodayNote(day: "2026-12-01")), .rest, "nothing planned reads as a rest day")
-    }
-
     func testWords() {
         let note = note()!
         XCTAssertEqual(Words.session(note.sessions[0]), "Run 45 min")

@@ -180,7 +180,7 @@ struct SettingsView: View {
                     .tint(Palette.mainFill)
                     .accessibilityIdentifier("quietToggle")
                 small("Triathlon writes today\u{2019}s note only when it opens. With this on, AMS Tria Menu opens Triathlon in the background, hidden and never in front, when there is no note for today, and again every \(Int(QuietOpen.refresh / 60)) minutes while a session is still to do.")
-                small("It never touches Triathlon while its window is showing. With this off, the mark stays grey until you open Triathlon yourself.")
+                small("It never touches Triathlon while its window is showing. With this off, the wave stays grey until you open Triathlon yourself.")
             }
 
             VStack(alignment: .leading, spacing: 6) {
@@ -251,10 +251,10 @@ struct SettingsView: View {
     @ViewBuilder private func swatch(_ kind: SignKind) -> some View {
         let box = RoundedRectangle(cornerRadius: 5, style: .continuous)
         switch kind {
+        case .waveGreen: MarkView(mark: .wave, size: 20, stroke: 2.3).foregroundStyle(Palette.today(scheme))
+        case .waveGrey: MarkView(mark: .wave, size: 20, stroke: 2.3).foregroundStyle(Color.secondary)
         case .markSport: MarkView(mark: .sport("run"), size: 18).foregroundStyle(Sport.ink("run", scheme))
-        case .markTick: MarkView(mark: .tick, size: 18).foregroundStyle(Palette.today(scheme))
         case .markMoon: MarkView(mark: .moon, size: 18).foregroundStyle(Sport.ink("rest", scheme))
-        case .markGrey: MarkView(mark: .medal, size: 18).foregroundStyle(Color.secondary)
         case .pillToDo:
             Text("to do").font(.system(size: 9, weight: .bold)).foregroundStyle(scheme == .dark ? Color.black.opacity(0.85) : Color.white)
                 .padding(.horizontal, 5).padding(.vertical, 1).background(Sport.ink("run", scheme), in: Capsule()).fixedSize()
