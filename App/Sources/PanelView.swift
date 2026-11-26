@@ -166,7 +166,7 @@ struct PanelView: View {
                 Text(Words.number(shown.latest)).font(.system(size: 24, weight: .bold)).monospacedDigit()
                     .accessibilityIdentifier("bodyNumber")
                 Spacer(minLength: 4)
-                Text(shown.smallWords(now: model.now)).font(.caption2).opacity(0.88).lineLimit(1).minimumScaleFactor(0.8)
+                Text(shown.smallWords(now: model.now)).font(.caption2.weight(.medium)).lineLimit(1).minimumScaleFactor(0.8)
                     .accessibilityIdentifier("bodyWords")
             }
             if !shown.today.isEmpty || !shown.yesterday.isEmpty {
@@ -218,7 +218,7 @@ struct BodyCurveView: View {
         GeometryReader { room in
             let size = room.size
             ZStack(alignment: .topLeading) {
-                area(today, in: size).fill(Color.white.opacity(0.22))
+                area(today, in: size).fill(Color.white.opacity(0.28))
                 line(yesterday, in: size).stroke(plum, style: StrokeStyle(lineWidth: 1.3, lineCap: .round, lineJoin: .round))
                 line(today, in: size).stroke(Color.white, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
                 if let last = today.last {
@@ -236,8 +236,8 @@ struct BodyCurveView: View {
                         path.move(to: CGPoint(x: x, y: size.height - foot))
                         path.addLine(to: CGPoint(x: x, y: size.height - foot + 3))
                     }
-                    .stroke(Color.white.opacity(0.6), lineWidth: 1)
-                    Text(String(format: "%02d", hour)).font(.system(size: 8.5)).monospacedDigit().foregroundStyle(Color.white.opacity(0.85))
+                    .stroke(Color.white.opacity(0.75), lineWidth: 1)
+                    Text(String(format: "%02d", hour)).font(.system(size: 8.5)).monospacedDigit().foregroundStyle(Color.white)
                         .fixedSize()
                         .position(x: x, y: size.height - 4.5)
                 }

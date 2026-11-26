@@ -118,7 +118,7 @@ extension Color {
 }
 
 /// The app's colours. Each means one thing: green = today (and the tick: done), blue = tomorrow,
-/// purple = this week, raspberry = Body Battery, a sport's colour = that sport still to do, grey = nothing to do
+/// purple = this week, pink = Body Battery, a sport's colour = that sport still to do, grey = nothing to do
 /// or nothing known.
 enum Palette {
     static func today(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0x00C97B : 0x00875A) }
@@ -128,8 +128,9 @@ enum Palette {
     static func week(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0xC084FC : 0x7C3AED) }
     static func weekFill(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0x9A5CF0 : 0x7C3AED) }
     static func body(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0xF472B6 : 0xC21E6E) }
-    /// The Body Battery card: white words stand on it by day and by night.
-    static func bodyFill(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0xB81868 : 0xC21E6E) }
+    /// The Body Battery card: a light, bright pink (0.3.2, his ask; deep raspberry C21E6E / B81868 before).
+    /// White words stand on it by day and by night.
+    static func bodyFill(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0xE0408C : 0xEC4899) }
     /// Yesterday's thin line on the card: a deep plum, darker than the card.
     static func yesterday(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0x45082A : 0x4E0A2C) }
     static func pale(_ color: Color, _ scheme: ColorScheme) -> Color { color.opacity(scheme == .dark ? 0.22 : 0.14) }
