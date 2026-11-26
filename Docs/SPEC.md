@@ -1,4 +1,4 @@
-# AMS Tria Menu 0.1 (build 1, 26 Nov 2026) - Specification
+# AMS Tria Menu 0.3.4 (build 7, 26 Nov 2026) - Specification
 
 ## Purpose
 
@@ -9,7 +9,7 @@ AMS Triathlon Training runs on the Mac as an iPad app, and an iPad app cannot pu
 Since 0.3 the item is ONE icon and nothing beside it (his own wish, with a picture of AMS Triathlon Training's app icon: "make it like this").
 
 - The icon is the training wave: the line with three blocks of AMS Triathlon Training's app icon (`tools/app-icon.svg` there), redrawn on the 24-point grid as the app mark `trainingWave` ("Training wave") in the central icon library (AMS-Icons). In the menu bar it is drawn 20 points wide with a stroke of 2.3, round ends and joins.
-- Green (day `#00875A`, night `#01C97B`) while the app has a note that counts today; grey while it has none. It does not change with the session, and it is redrawn only when it turns from green to grey or back.
+- Green (day `#00875A`, night `#00C97B`) while the app has a note that counts today; grey while it has none. It does not change with the session, and it is redrawn only when it turns from green to grey or back.
 - No number: Body Battery is in the panel and in the hover words.
 - Resting the pointer on it says the sessions and Body Battery in words, for example "Run 45 min, to do · Swim 40 min, done" and under it "Body Battery 62".
 - A click opens the panel. A right click or control-click shows the short menu: "Open Triathlon", "Refresh now", "Settings…".
@@ -42,7 +42,7 @@ There is no "done" button. Triathlon cannot log a session on the Mac (only the i
 - The note has a format number (1 at first). Unknown fields are ignored and missing ones are empty. A higher format number than the app knows means: show nothing and say so.
 - If neither the Board nor Triathlon has a reading: a dash and the words "Garmin Board not answering".
 - If the Board answers for today but has no reading yet (the watch has not synced since midnight): a dash and the words "no reading yet today". Yesterday's number is never shown as today's.
-- Each answer makes the Board ask Garmin about 17 questions (the Board keeps its answer for 5 minutes). That is why the app asks only every 30 minutes: Body Battery changes only when the watch syncs.
+- Each answer makes the Board ask Garmin more than a dozen questions (the Board keeps its answer for 5 minutes). That is why the app asks only every 30 minutes: Body Battery changes only when the watch syncs.
 - Triathlon's own reading (`garmin-body.json` beside the note) counts its times from 2001; the app turns them into the same count as the Board's. When that file is still yesterday's, its "today" curve is used as yesterday's line.
 - The sport marks are AMS Triathlon Training's own marks from the central icon library (AMS-Icons package, pinned revision), so both apps show the same drawings.
 - The app keeps its own memory of each day's curve, for the newest three days, on this Mac only. The fuller curve of a day wins.
@@ -66,7 +66,7 @@ Nothing to set up. On 26 Nov 2026 the installed app read Triathlon's note withou
 
 ## Settings window
 
-440 points wide. Three tabs: "Settings", "How it works", "What's new". At the bottom of every tab: "Version 0.1 (1)", "Quit AMS Tria Menu", and the full-colour "Done" button. Escape also closes the window.
+440 points wide. Three tabs: "Settings", "How it works", "What's new". At the bottom of every tab: "Version 0.3.4 (7)", "Quit AMS Tria Menu", and the full-colour "Done" button. Escape also closes the window.
 
 - Settings: "Open at login"; "Open Triathlon quietly" with two lines of explanation; the section "Where the figures come from" with two status lines (today's note: when Triathlon wrote it; Body Battery: from the Garmin Board, when the watch last synced).
 - How it works: a guide to the whole app, including the section "Signs in this app" (every mark and colour with its meaning). The text is in `App/Sources/Guide.swift`.
@@ -74,7 +74,7 @@ Nothing to set up. On 26 Nov 2026 the installed app read Triathlon's note withou
 
 ## Keeper and only one copy
 
-- Open at login uses the "keeper": a LaunchAgent, `com.schabbauer.AMSTriaMenu.keeper`. It opens the app at every login and again after an unexpected stop, but not after Quit (a clean end). The Mac's own login list is not used. A copy opened by hand gives way to the keeper while "Open at login" is on and the app sits in an Applications folder. A copy opened with `--plain` never hands itself over.
+- Open at login uses the "keeper": a LaunchAgent, `com.schabbauer.AMSTriaMenu.keeper`. It opens the app at every login and again after an unexpected stop, but not after Quit (a clean end). The switch also puts the app in the Mac's own login list (`SMAppService.mainApp.register()`), so the Mac opens it at login; the keeper covers the restart after an unexpected stop. "Open at login" starts off: it is on only after the owner switches it on in Settings or `--open-at-login on` is used. `Tools/install.sh` does not switch it on; it only starts the app under the keeper when the switch is already on. A copy opened by hand gives way to the keeper while "Open at login" is on and the app sits in an Applications folder. A copy opened with `--plain` never hands itself over.
 - Only one copy of the app runs: the copy that started first stays. Same start time: the smaller process number counts as earlier.
 
 ## Place in the menu bar
@@ -108,7 +108,7 @@ Nine small rule tests in `Core/Tests/TriaMenuCoreTests/RulesTests.swift` (all va
 - the quiet opening rule with its numbers (20 minutes, 30 minutes, never while Triathlon's window shows);
 - the keeper's start order, the place repair and the one-copy rule.
 
-## Not in 0.1
+## Not in the app
 
 - No "done" button on the Mac.
 - No notifications.
@@ -116,6 +116,8 @@ Nine small rule tests in `Core/Tests/TriaMenuCoreTests/RulesTests.swift` (all va
 - No changes to the plan: the app only reads.
 
 ## Version history
+
+- 0.3.4 (7), 26 Nov 2026: words only, no change in behaviour. The guide's First start said "Open at login" is on after install; it starts off. The guide's Settings paragraph now says the app is in the Mac's login list and the keeper restarts it, and names the "Refresh now" button. The guide and this specification both say the Board asks Garmin "more than a dozen questions" per answer (the guide said "a good dozen", this said "about 17"). This specification no longer says the Mac's login list is unused, gives the night green as `#00C97B` (was `#01C97B`), and carries the right version in its title and in the Settings line (both said 0.1).
 
 - 0.3.3 (6), 26 Nov 2026: the Body Battery card is a bit paler pink still, `#F06AAB` by day and `#E35A9D` by night (his ask; `#EC4899` / `#E0408C` in 0.3.2). So the white words stay easy to read, the small words at the right of the card are semibold (medium before) and the hour figures 06 / 12 / 18 are medium weight (regular before). Nothing else changed.
 - 0.3.2 (5), 26 Nov 2026: the Body Battery card is a lighter, brighter pink, `#EC4899` by day and `#E0408C` by night (his ask; deep raspberry `#C21E6E` / `#B81868` before). The small words at the right of the card and the hour figures are full white (88 % and 85 % before), the hour ticks 75 % (60 % before), and the soft fill under today's line 28 % (22 % before). Nothing else changed.
