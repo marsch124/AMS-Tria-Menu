@@ -6,7 +6,7 @@ import TriaMenuCore
 /// The hand-drawn marks, all from the central icon library (AMS-Icons): a 24-point grid, one 1.9 stroke,
 /// round ends, no fill. The sport marks are AMS Triathlon Training's own, so both apps show the same drawing.
 enum Mark: Equatable {
-    case sport(String), tick, moon, medal, gear, wave
+    case sport(String), tick, moon, gear, wave
 
     /// The drawing as path data on the 24-point grid.
     var d: String {
@@ -14,7 +14,6 @@ enum Mark: Equatable {
         case .sport(let id): return Sport.mark(id).path
         case .tick: return AppMark.triCheck.path
         case .moon: return AppMark.moon.path
-        case .medal: return IconLibrary.handIcon("triathlon")?.path ?? AppMark.triRace.path
         case .gear: return ControlMark.settings.path
         // The training wave: the line of AMS Triathlon Training's app icon.
         case .wave: return AppMark.trainingWave.path
@@ -146,7 +145,7 @@ enum Palette {
     }
 }
 
-/// The app's tile: a flat calm green with the white medal.
+/// The app's tile: a flat calm green with the white training wave (0.3.1; the medal before).
 enum TileArt {
     static let corner: CGFloat = 0.26
     static let green = NSColor(srgbRed: 0, green: 0x87 / 255.0, blue: 0x5A / 255.0, alpha: 1)
@@ -158,8 +157,8 @@ enum TileArt {
             context.addPath(CGPath(roundedRect: rect, cornerWidth: radius, cornerHeight: radius, transform: nil))
             context.setFillColor(green.cgColor)
             context.fillPath()
-            let inset = rect.width * 0.14
-            Mark.medal.draw(in: rect.insetBy(dx: inset, dy: inset).offsetBy(dx: 0, dy: -rect.width * 0.01), color: .white, context: context, stroke: 2.1)
+            let inset = rect.width * 0.09
+            Mark.wave.draw(in: rect.insetBy(dx: inset, dy: inset), color: .white, context: context, stroke: 2.4)
             return true
         }
     }

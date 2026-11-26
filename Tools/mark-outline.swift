@@ -1,11 +1,11 @@
 import CoreGraphics
 import Foundation
 
-// Prints the "triathlon" mark (a medal on its ribbon) as ONE filled outline (SVG path data) on a square canvas:
-// the drawn line turned into a shape. The Mac's layered app icon fills whatever it is given, so a plain
+// Prints the training wave (three blocks of work on a rest line) as ONE filled outline (SVG path data) on a square
+// canvas: the drawn line turned into a shape. The Mac's layered app icon fills whatever it is given, so a plain
 // line drawing would come out as blobs.
 // Used by make-icon.py:  swift Tools/mark-outline.swift <canvas> <share of the canvas> <line weight on the 24 grid>
-// The numbers are the AMS Icon Library mark "triathlon": M7.5 3.5 10.6 10 M16.5 3.5 13.4 10 M7.5 3.5h9 and a circle at 12,15 radius 5.
+// The numbers are the AMS Icon Library app mark "trainingWave".
 
 let arguments = CommandLine.arguments
 guard arguments.count == 4, let size = Double(arguments[1]), let share = Double(arguments[2]), let weight = Double(arguments[3]) else {
@@ -13,16 +13,16 @@ guard arguments.count == 4, let size = Double(arguments[1]), let share = Double(
     exit(2)
 }
 
+let wave: [(CGFloat, CGFloat)] = [(2.5, 16.05), (3.89, 7.95), (6.43, 7.95), (7.82, 16.05), (9.34, 16.05), (10.73, 7.95), (13.27, 7.95),
+                                  (14.66, 16.05), (16.18, 16.05), (17.57, 7.95), (20.11, 7.95), (21.5, 16.05)]
 let mark = CGMutablePath()
-mark.move(to: CGPoint(x: 7.5, y: 3.5)); mark.addLine(to: CGPoint(x: 10.6, y: 10))
-mark.move(to: CGPoint(x: 16.5, y: 3.5)); mark.addLine(to: CGPoint(x: 13.4, y: 10))
-mark.move(to: CGPoint(x: 7.5, y: 3.5)); mark.addLine(to: CGPoint(x: 16.5, y: 3.5))
-mark.addEllipse(in: CGRect(x: 7, y: 10, width: 10, height: 10))
+mark.move(to: CGPoint(x: wave[0].0, y: wave[0].1))
+for point in wave.dropFirst() { mark.addLine(to: CGPoint(x: point.0, y: point.1)) }
 
-// The mark's drawn extent is 2.5...21 high (centre 11.75): shift it so it sits in the middle of the grid.
+// The wave is centred on the grid already (7.95 to 16.05 high, 2.5 to 21.5 wide).
 let k = CGFloat(size * share / 24)
 let o = CGFloat(size) / 2 - 12 * k
-var place = CGAffineTransform(translationX: o, y: o + 0.25 * k).scaledBy(x: k, y: k)
+var place = CGAffineTransform(translationX: o, y: o).scaledBy(x: k, y: k)
 guard let placed = mark.copy(using: &place) else { exit(1) }
 let outline = placed.copy(strokingWithWidth: CGFloat(weight) * k, lineCap: .round, lineJoin: .round, miterLimit: 10)
     .normalized(using: .winding)

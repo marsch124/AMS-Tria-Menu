@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Builds the AMS Tria Menu app icon: a flat calm green tile with the white hand-drawn triathlon mark (a medal on its ribbon).
+"""Builds the AMS Tria Menu app icon: a flat calm green tile with the white training wave (three blocks of work on a
+rest line, the line of AMS Triathlon Training's app icon; the app mark "trainingWave" in the AMS Icon Library).
 
 Writes, all from the same numbers (the same way AMS Tria Menu does it):
   App/Resources/AppIcon.icon   layered icon (Icon Composer format): green background, ONE layer (the mark),
@@ -16,15 +17,16 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 GREEN = (0.0, 135 / 255, 90 / 255)   # #00875A
 WHITE = (1.0, 1.0, 1.0)
-GLYPH = 0.80            # the mark's 24-unit grid takes this share of the tile's width
-STROKE = 2.1
-STROKE_SMALL = 2.4      # heavier line for the 64 px and smaller pictures in the .icns
+GLYPH = 0.86            # the mark's 24-unit grid takes this share of the tile's width
+STROKE = 2.3
+STROKE_SMALL = 2.6      # heavier line for the 64 px and smaller pictures in the .icns
 CANVAS, TILE, RADIUS = 1024, 824, 185.4
 
-# The "triathlon" mark on the 24 grid: ribbon lines, ribbon top, medal circle. Shifted 0.25 down to centre its extent.
-LINES = [((7.5, 3.5), (10.6, 10)), ((16.5, 3.5), (13.4, 10)), ((7.5, 3.5), (16.5, 3.5))]
-CIRCLE = ((12, 15), 5)
-DY = 0.25
+# The training wave on the 24 grid (AMS-Icons AppMark.trainingWave): one line through these points. It is centred already.
+WAVE = [(2.5, 16.05), (3.89, 7.95), (6.43, 7.95), (7.82, 16.05), (9.34, 16.05), (10.73, 7.95), (13.27, 7.95),
+        (14.66, 16.05), (16.18, 16.05), (17.57, 7.95), (20.11, 7.95), (21.5, 16.05)]
+LINES = list(zip(WAVE, WAVE[1:]))
+DY = 0.0
 
 
 def rgb8(c):
@@ -112,11 +114,6 @@ def render_flat(stroke, ss=4):
         for i in range(n + 1):
             t = i / n
             dab((pa[0] + (pb[0] - pa[0]) * t, pa[1] + (pb[1] - pa[1]) * t))
-    cc = P(CIRCLE[0])
-    cr = CIRCLE[1] * scale
-    for i in range(721):
-        a = math.radians(i / 2)
-        dab((cc[0] + cr * math.cos(a), cc[1] + cr * math.sin(a)))
     return img.convert("RGBa")
 
 

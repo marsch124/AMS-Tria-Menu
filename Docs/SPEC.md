@@ -19,7 +19,7 @@ Since 0.3 the item is ONE icon and nothing beside it (his own wish, with a pictu
 
 300 points wide, under the item. From top to bottom:
 
-1. Header: the app tile (white medal on green), "AMS Tria Menu", the version, and a gear button for Settings.
+1. Header: the app tile (the white training wave on green; a white medal before 0.3.1), "AMS Tria Menu", the version, and a gear button for Settings.
 2. "Today · Tue 1 Dec" (green heading). One row per session: the sport's mark, the sport with its length right beside it ("Run 45 min"), then a small filled pill "to do" in the sport's colour, or a green tick with "done", or grey "missed". Under that, the session's title in small grey words. A click on a row opens that session in AMS Triathlon Training with the link `amsworkoutsync://session/<key>`. A grey line under the rows says "Click a session to open it in Triathlon". A rest day shows one row with the moon and "Rest day".
 3. If there is no note for today, grey words say why: "No note for today yet. Triathlon writes it when it opens.", or "AMS Triathlon Training is not on this Mac.", or that the Mac did not let the app read the note (allow it in System Settings, Privacy & Security), or that the note is newer than this version understands.
 4. "Tomorrow" (blue heading): tomorrow's first session, for example "Bike, 1 h 10 min", or "Rest day". Missing when nothing is planned.
@@ -117,6 +117,7 @@ Nine small rule tests in `Core/Tests/TriaMenuCoreTests/RulesTests.swift` (all va
 
 ## Version history
 
+- 0.3.1 (4), 26 Nov 2026: the app icon and the tile in the panel and in Settings are the white training wave on calm green `#00875A` (his yes; a white medal before). White on green, not green on dark teal like AMS Triathlon Training's icon, so the two apps can be told apart. Made by `Tools/make-icon.py` and `Tools/mark-outline.swift` from the same points as the library mark `trainingWave`.
 - 0.3 (3), 26 Nov 2026: the menu bar item is one icon, the training wave (green with today's note, grey without); the changing mark and the Body Battery number left the menu bar. The rule for the mark's faces and its test were removed (nine rule tests). The wave was added to AMS-Icons as `trainingWave`; the package pin moved to 58433eb.
 - 0.2 (2), 26 Nov 2026: the Body Battery card in look C3 (his pick from one picture with numbered options; he kept the menu bar item and the session rows as they were): number beside the name, wide curve with a soft fill under today and the hours 06, 12, 18. In 0.1 the number stood large on the left with a small curve (150 by 62 points) beside it.
 - 0.1 (1), 26 Nov 2026: first version.
