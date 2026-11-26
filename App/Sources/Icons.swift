@@ -128,9 +128,9 @@ enum Palette {
     static func week(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0xC084FC : 0x7C3AED) }
     static func weekFill(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0x9A5CF0 : 0x7C3AED) }
     static func body(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0xF472B6 : 0xC21E6E) }
-    /// The Body Battery card: a light, bright pink (0.3.2, his ask; deep raspberry C21E6E / B81868 before).
-    /// White words stand on it by day and by night.
-    static func bodyFill(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0xE0408C : 0xEC4899) }
+    /// The Body Battery card: a pale, bright pink (0.3.3, his ask "a bit paler still"; EC4899 / E0408C in 0.3.2,
+    /// deep raspberry C21E6E / B81868 before). White words stand on it by day and by night.
+    static func bodyFill(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0xE35A9D : 0xF06AAB) }
     /// Yesterday's thin line on the card: a deep plum, darker than the card.
     static func yesterday(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0x45082A : 0x4E0A2C) }
     static func pale(_ color: Color, _ scheme: ColorScheme) -> Color { color.opacity(scheme == .dark ? 0.22 : 0.14) }

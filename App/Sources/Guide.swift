@@ -41,6 +41,12 @@ enum Guide {
     ]
 
     static let whatsNew: [Release] = [
+        Release(version: "0.3.3", date: "26 Nov 2026", items: [
+            "The Body Battery card in the panel is a bit paler pink, as you asked. Before (0.3.2): a bright pink. Now: a paler pink, a little softer at night. The words on it are still white.",
+            "So the white words stay easy to read on the paler pink, the small words at the right of the card, such as \"watch synced 15:09\", are now semibold. Before: medium.",
+            "The hour figures 06, 12 and 18 under the curve are now medium weight. Before: regular.",
+            "Nothing else changed: the menu bar item, the rows, the curve, yesterday's dark plum line and the green button stay as they were.",
+        ]),
         Release(version: "0.3.2", date: "26 Nov 2026", items: [
             "The Body Battery card in the panel is a lighter, brighter pink, as you asked. Before: a deep raspberry. Now: a bright pink, a little softer at night. The words on it are still white.",
             "The small words at the right of the card, such as \"watch synced 15:09\", are now fully white and a touch bolder, and the hour figures 06, 12 and 18 are fully white. Before: slightly see-through (88 % and 85 %). They stay easy to read on the lighter pink.",

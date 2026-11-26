@@ -166,7 +166,7 @@ struct PanelView: View {
                 Text(Words.number(shown.latest)).font(.system(size: 24, weight: .bold)).monospacedDigit()
                     .accessibilityIdentifier("bodyNumber")
                 Spacer(minLength: 4)
-                Text(shown.smallWords(now: model.now)).font(.caption2.weight(.medium)).lineLimit(1).minimumScaleFactor(0.8)
+                Text(shown.smallWords(now: model.now)).font(.caption2.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.8)
                     .accessibilityIdentifier("bodyWords")
             }
             if !shown.today.isEmpty || !shown.yesterday.isEmpty {
@@ -237,7 +237,7 @@ struct BodyCurveView: View {
                         path.addLine(to: CGPoint(x: x, y: size.height - foot + 3))
                     }
                     .stroke(Color.white.opacity(0.75), lineWidth: 1)
-                    Text(String(format: "%02d", hour)).font(.system(size: 8.5)).monospacedDigit().foregroundStyle(Color.white)
+                    Text(String(format: "%02d", hour)).font(.system(size: 8.5, weight: .medium)).monospacedDigit().foregroundStyle(Color.white)
                         .fixedSize()
                         .position(x: x, y: size.height - 4.5)
                 }
