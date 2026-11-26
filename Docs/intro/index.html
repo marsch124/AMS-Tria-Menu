@@ -1,0 +1,602 @@
+<meta charset="utf-8">
+<title>Tria Menu Tour</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: chapter rail on the left, coach + a pretend Mac on the right. Reusable tour engine: LESSONS + a small simulator.
+   Based on the AMS Fan Menu tour engine. Written for AMS Tria Menu 0.3.3. Update this tour in the release that changes a taught screen.
+   Every pretend-screen class starts with tm- so it can never clash with the engine's own classes. */
+:root {
+  --bg: #F3F6FA; --panel: #FFFFFF; --fg: #17212B; --muted: #5F6C7A; --line: #DCE3EB;
+  --accent: #00875A; --accent-soft: #DDF1E8; --good: #2F7D32; --good-soft: #E6F3E6; --warn: #A8431A;
+  --desk-a: #C9D6E2; --desk-b: #E4DCEB; --menubar: rgba(255,255,255,.8); --menubar-fg: #1B1B1D;
+  --win: #FFFFFF; --win-bar: #F1F1F3; --win-fg: #1B1B1D; --win-muted: #6F6F74; --card: rgba(0,0,0,.05); --shadow: 0 18px 40px rgba(23,33,43,.2);
+  --c-mac: #1C7347; --c-macf: #217E4F; --c-fan: #1F69C2; --c-fanf: #00875A; --c-heat: #B8421C; --c-heatf: #C44D24;
+  --c-warn: #8F5900; --c-danger: #C71A24; --c-power: #07707A; --c-story: #6B4DBC; --c-storyf: #6B4DBC;
+  --f-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body: "Figtree", -apple-system, "Segoe UI", sans-serif;
+  --f-mac: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#12171D; --panel:#1B232C; --fg:#EDF2F7; --muted:#9FADBB; --line:#2E3946;
+  --accent:#4FD39A; --accent-soft:#16332A; --good:#8FD18F; --good-soft:#1D3320; --warn:#F2A47F;
+  --desk-a:#1C2733; --desk-b:#2E2A3A; --menubar: rgba(28,28,32,.8); --menubar-fg:#F2F2F4;
+  --win:#27272B; --win-bar:#323237; --win-fg:#F2F2F4; --win-muted:#A5A5AD; --card: rgba(255,255,255,.07); --shadow: 0 18px 40px rgba(0,0,0,.55);
+  --c-mac:#66C78F; --c-macf:#298554; --c-fan:#80BAFA; --c-fanf:#2B75CC; --c-heat:#F79470; --c-heatf:#C44D24;
+  --c-warn:#F5C25C; --c-danger:#FF6B6B; --c-power:#5CCCCC; --c-story:#B8A3F5; --c-storyf:#755CC7;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg:#12171D; --panel:#1B232C; --fg:#EDF2F7; --muted:#9FADBB; --line:#2E3946;
+  --accent:#4FD39A; --accent-soft:#16332A; --good:#8FD18F; --good-soft:#1D3320; --warn:#F2A47F;
+  --desk-a:#1C2733; --desk-b:#2E2A3A; --menubar: rgba(28,28,32,.8); --menubar-fg:#F2F2F4;
+  --win:#27272B; --win-bar:#323237; --win-fg:#F2F2F4; --win-muted:#A5A5AD; --card: rgba(255,255,255,.07); --shadow: 0 18px 40px rgba(0,0,0,.55);
+  --c-mac:#66C78F; --c-macf:#298554; --c-fan:#80BAFA; --c-fanf:#2B75CC; --c-heat:#F79470; --c-heatf:#C44D24;
+  --c-warn:#F5C25C; --c-danger:#FF6B6B; --c-power:#5CCCCC; --c-story:#B8A3F5; --c-storyf:#755CC7;
+  color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.45; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: 230px minmax(0,1fr); gap: 22px; }
+svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: none }
+svg.g { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: none }
+
+/* Rail */
+.rail { display: flex; flex-direction: column; gap: 4px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); align-self: start; }
+.brand { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.brand h1 { font-family: var(--f-display); font-size: 19px; line-height: 1.1; margin: 0; text-wrap: balance }
+.brand small { color: var(--muted); font-size: 12px }
+.chap { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 9px; border: 0; background: none; color: var(--fg); font: inherit; text-align: left; cursor: pointer; }
+.chap:hover { background: var(--accent-soft) }
+.chap:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.chap .n { color: var(--muted); font-size: 12px; margin-left: auto; font-variant-numeric: tabular-nums; white-space: nowrap }
+.chap.cur { background: var(--accent-soft); color: var(--accent); font-weight: 600 }
+.chap.done .n { color: var(--good) }
+.bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin: 10px 2px 2px }
+.bar i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .4s }
+.railnote { color: var(--muted); font-size: 12px; margin: 4px 2px }
+
+/* Coach */
+.main { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
+.coach { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px 16px; align-items: center; }
+.coach .eyebrow { grid-column: 1 / -1; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); font-weight: 600; display: flex; gap: 8px; align-items: center }
+.coach .eyebrow .kind { color: var(--muted); font-weight: 500 }
+.coach h2 { font-family: var(--f-display); font-size: 23px; line-height: 1.2; margin: 0; text-wrap: balance }
+.coach p { margin: 4px 0 0; color: var(--fg); max-width: 66ch }
+.coach .btns { display: flex; gap: 8px; align-items: center }
+.btn { font: inherit; font-weight: 600; border-radius: 9px; padding: 8px 16px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer }
+.btn.main-b { background: #00875A; border-color: #00875A; color: #fff }
+.btn.main-b:disabled { opacity: .45; cursor: default }
+.btn.ghost { border-color: transparent; color: var(--muted) }
+.answers { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px }
+.ans { font: inherit; padding: 8px 14px; border-radius: 9px; border: 1.5px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer }
+.ans:hover { border-color: var(--accent) }
+.ans.right { border-color: var(--good); background: var(--good-soft); color: var(--good); font-weight: 600 }
+.ans.wrong { border-color: var(--warn); color: var(--warn); text-decoration: line-through }
+.feedback { grid-column: 1 / -1; font-weight: 600; color: var(--good); min-height: 1.4em; margin: 0 }
+.feedback.no { color: var(--warn) }
+
+/* Stage = pretend Mac */
+.stagebox { position: relative; width: 100%; aspect-ratio: 960 / 560; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow); max-width: 100% }
+.stage { position: absolute; left: 0; top: 0; width: 960px; height: 560px; transform-origin: 0 0; font-family: var(--f-mac); font-size: 12.5px; color: var(--win-fg);
+  background: radial-gradient(120% 90% at 15% 10%, var(--desk-b), transparent 60%), linear-gradient(160deg, var(--desk-a), var(--desk-b)); }
+.stage button { font-family: inherit }
+/* AMS Tria Menu's pretend screen. Colours are the app's own (Icons.swift, Palette). Every class starts with tm-. */
+:root {
+  --t-green:#00875A; --t-greenf:#00875A; --t-blue:#1266C8; --t-purple:#7C3AED; --t-purplef:#7C3AED; --t-pink:#F06AAB; --t-plum:#4E0A2C; --t-pale:.14;
+  --i-swim:#2B4A88; --i-bike:#8C7605; --i-run:#49713B; --i-strength:#8C4D0E; --i-rest:#37404C; --i-rowing:#07514A; --i-mobility:#47298B; --i-race:#8D2929; --pilltx:#fff; --miss:#6F6F74;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --t-green:#00C97B; --t-blue:#3B9EFF; --t-purple:#C084FC; --t-purplef:#9A5CF0; --t-pink:#E35A9D; --t-plum:#45082A; --t-pale:.22;
+  --i-swim:#4F87F8; --i-bike:#FFD60A; --i-run:#85CE6C; --i-strength:#FF8C1A; --i-rest:#A3B1C2; --i-rowing:#0D9488; --i-mobility:#8650FE; --i-race:#EF4444; --pilltx:rgba(0,0,0,.85); --miss:#A5A5AD; } }
+:root[data-theme="dark"] {
+  --t-green:#00C97B; --t-blue:#3B9EFF; --t-purple:#C084FC; --t-purplef:#9A5CF0; --t-pink:#E35A9D; --t-plum:#45082A; --t-pale:.22;
+  --i-swim:#4F87F8; --i-bike:#FFD60A; --i-run:#85CE6C; --i-strength:#FF8C1A; --i-rest:#A3B1C2; --i-rowing:#0D9488; --i-mobility:#8650FE; --i-race:#EF4444; --pilltx:rgba(0,0,0,.85); --miss:#A5A5AD; }
+
+.tm-sp { flex: 1 }
+.tm-mbar { position: absolute; inset: 0 0 auto; height: 26px; background: var(--menubar); backdrop-filter: blur(10px); display: flex; align-items: center; gap: 16px; padding: 0 12px; color: var(--menubar-fg); font-size: 13px; z-index: 30 }
+.tm-mbar b { font-weight: 700 }
+.tm-item { position: relative; height: 22px; display: flex; align-items: center; padding: 0 6px; border: 0; background: none; font: inherit; border-radius: 5px; cursor: pointer }
+.tm-item:hover, .tm-item.open { background: rgba(127,127,127,.24) }
+.tm-tip { display: none; position: absolute; right: 0; top: 26px; width: max-content; max-width: 260px; background: var(--win); color: var(--win-fg); border: 1px solid var(--line); border-radius: 6px; box-shadow: var(--shadow); padding: 4px 8px; font-size: 12px; line-height: 1.35; text-align: left; z-index: 40; pointer-events: none; font-weight: 400 }
+.tm-item:hover .tm-tip { display: block }
+.tm-item.open .tm-tip { display: none }
+.tm-tile { display: inline-grid; place-items: center; flex: none; background: #00875A; color: #fff }
+.tm-glyph { display: block; flex: none }
+
+.tm-panel { position: absolute; right: 8px; top: 30px; width: 300px; background: var(--win); border: 1px solid var(--line); border-radius: 11px; box-shadow: var(--shadow); padding: 12px; z-index: 25; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px }
+.tm-panel > * { flex: none }
+.tm-ph { display: flex; align-items: center; gap: 7px }
+.tm-ph b { font-size: 14px } .tm-ph span { color: var(--win-muted); font-size: 12px }
+.tm-gear { border: 0; background: none; color: var(--win-muted); padding: 2px 3px; border-radius: 5px; cursor: pointer; display: grid }
+.tm-hd { font-size: 11px; font-weight: 600 }
+.tm-blk { display: flex; flex-direction: column; gap: 5px }
+.tm-sess { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; border-radius: 9px; padding: 5px 8px; text-align: left; cursor: pointer; color: var(--win-fg); background: color-mix(in srgb, var(--ink) calc(var(--t-pale) * 100%), transparent) }
+.tm-sess:hover { opacity: .85 }
+.tm-sess svg { width: 22px; height: 22px; flex: none; color: var(--ink); fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round }
+.tm-sname { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums }
+.tm-sess small { display: block; color: var(--win-muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 215px }
+.tm-pill { background: var(--ink); color: var(--pilltx); font-size: 10px; font-weight: 700; border-radius: 9px; padding: 0 7px }
+.tm-tick { display: inline-flex; align-items: center; gap: 2px; color: var(--t-green); font-size: 11px; font-weight: 700 }
+.tm-tick svg { width: 13px; height: 13px; color: var(--t-green); stroke-width: 2.4 }
+.tm-miss { color: var(--win-muted); font-size: 11px; font-weight: 600 }
+.tm-hint { font-size: 10px; color: var(--win-muted); padding-left: 2px }
+.tm-quiet { font-size: 12.5px; color: var(--win-muted); background: rgba(127,127,127,.12); border-radius: 9px; padding: 8px; line-height: 1.35 }
+.tm-line { font-size: 12.5px; font-variant-numeric: tabular-nums }
+.tm-weekbar { height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--t-purple) calc(var(--t-pale) * 100%), transparent); margin-top: 2px; overflow: hidden }
+.tm-weekbar i { display: block; height: 100%; border-radius: 3px; background: var(--t-purplef) }
+.tm-card { background: var(--t-pink); color: #fff; border-radius: 11px; padding: 6px 10px 7px; margin-top: 3px }
+.tm-ctop { display: flex; align-items: baseline; gap: 7px }
+.tm-ctop .tm-cap { font-size: 11px; font-weight: 600 }
+.tm-bnum { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1 }
+.tm-small { font-size: 10px; font-weight: 600; white-space: nowrap }
+.tm-card svg { display: block; width: 100%; height: 74px }
+.tm-main { border: 0; border-radius: 9px; height: 28px; background: #00875A; color: #fff; font: 600 12.5px var(--f-mac); cursor: pointer; width: 100% }
+.tm-main:hover { opacity: .9 }
+
+.tm-ctx { position: absolute; right: 118px; top: 28px; width: 160px; background: var(--win); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); padding: 4px; z-index: 36 }
+.tm-ctx button { display: flex; width: 100%; border: 0; background: none; color: var(--win-fg); font: inherit; padding: 3px 8px; border-radius: 5px; text-align: left; cursor: pointer }
+.tm-ctx button:hover { background: #00875A; color: #fff }
+.tm-practice { position: absolute; left: 12px; bottom: 12px; width: 260px; background: var(--win); border: 1px dashed var(--win-muted); border-radius: 11px; padding: 8px; z-index: 12; display: flex; flex-direction: column; gap: 4px }
+.tm-practice small { color: var(--win-muted); font-size: 11px; line-height: 1.3; margin-bottom: 2px }
+.tm-practice button { font: inherit; padding: 4px 8px; border-radius: 7px; border: 1px solid var(--line); background: var(--win-bar); color: var(--win-fg); cursor: pointer; text-align: left }
+.tm-mbtn { font: inherit; padding: 3px 11px; border-radius: 7px; border: 0; background: color-mix(in srgb, var(--t-green) calc(var(--t-pale) * 100%), transparent); color: var(--t-green); font-weight: 500; cursor: pointer }
+.tm-mbtn.prim { background: #00875A; color: #fff }
+
+.tm-win { position: absolute; background: var(--win); border-radius: 11px; box-shadow: var(--shadow); border: 1px solid var(--line); overflow: hidden; z-index: 20; display: flex; flex-direction: column }
+.tm-tb { height: 28px; flex: none; background: var(--win-bar); display: flex; align-items: center; gap: 7px; padding: 0 11px; font-weight: 600 }
+.tm-dots { display: flex; gap: 6px; margin-right: 8px }
+.tm-dots i { width: 11px; height: 11px; border-radius: 50%; background: #E0605A; display: block; cursor: pointer }
+.tm-dots i:nth-child(2), .tm-dots i:nth-child(3) { background: rgba(127,127,127,.35); cursor: default }
+.tm-ttl { flex: 1; text-align: center; margin-right: 50px; color: var(--win-muted) }
+.tm-set { left: 230px; top: 34px; width: 440px; height: 516px }
+.tm-sh { display: flex; align-items: center; gap: 8px; padding: 9px 14px 4px }
+.tm-sh b { font-size: 16px } .tm-sh span { color: var(--win-muted) }
+.tm-tabs { display: flex; gap: 6px; padding: 4px 14px }
+.tm-tabs button { flex: 1; font: inherit; font-size: 12.5px; height: 26px; border: 0; background: rgba(127,127,127,.14); color: var(--win-fg); border-radius: 8px; cursor: pointer; white-space: nowrap }
+.tm-tabs button.on { color: #fff; font-weight: 600 }
+.tm-tabs .t-settings.on { background: #00875A } .tm-tabs .t-guide.on { background: #1266C8 } .tm-tabs .t-news.on { background: #7C3AED }
+.tm-pane { position: relative; flex: 1; overflow: auto; padding: 8px 14px 6px; display: flex; flex-direction: column; gap: 12px; line-height: 1.35; font-size: 12px }
+.tm-pane h5 { margin: 0 0 2px; font-size: 13px } .tm-pane p { margin: 0 }
+.tm-pane small { display: block; color: var(--win-muted); font-size: 11px; line-height: 1.3 }
+.tm-row { display: flex; align-items: center; gap: 8px }
+.tm-sw { position: relative; width: 30px; height: 18px; border-radius: 9px; border: 0; background: rgba(127,127,127,.4); cursor: pointer; flex: none; padding: 0 }
+.tm-sw::after { content: ""; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: left .15s }
+.tm-sw.on { background: #00875A } .tm-sw.on::after { left: 14px }
+.tm-sfoot { display: flex; align-items: center; gap: 8px; padding: 6px 14px 10px; font-size: 11px; color: var(--win-muted) }
+.tm-fig b { display: block; font-size: 12.5px; font-weight: 600 } .tm-fig span { color: var(--win-muted); font-size: 12.5px }
+.tm-sign { display: flex; align-items: center; gap: 8px } .tm-sign > i { width: 34px; flex: none; display: flex; justify-content: center; align-items: center; font-style: normal }
+.tm-sign > i svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round }
+.tm-sign > i s { display: block; text-decoration: none; width: 28px; height: 14px; border-radius: 5px }
+.tm-sign > i u { display: block; text-decoration: none; width: 12px; height: 12px; border-radius: 50% }
+.tm-rel h5 { color: var(--t-purple) } .tm-rel p { padding-left: 4px }
+.tm-guide h5 { color: var(--t-blue) }
+
+.tm-toast { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); background: var(--good); color: #fff; font: 600 13px var(--f-body); padding: 7px 14px; border-radius: 20px; z-index: 50; animation: fmpop .3s; white-space: nowrap; max-width: 90% }
+:root[data-theme="dark"] .tm-toast { color: #10200F }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tm-toast { color: #10200F } }
+
+
+/* Highlight */
+.target { z-index: 2; animation: fmring 1.6s ease-in-out infinite; border-radius: 7px }
+@keyframes fmring { 0%,100% { box-shadow: 0 0 0 2px #E6B53F, 0 0 0 6px rgba(230,181,63,.35) } 50% { box-shadow: 0 0 0 2px #E6B53F, 0 0 0 11px rgba(230,181,63,0) } }
+@keyframes fmpop { from { transform: translateY(8px); opacity: .3 } to { transform: none; opacity: 1 } }
+@keyframes fmgrow { from { width: 0 } to { width: 100% } }
+
+/* Finish */
+.finish { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px }
+.finish h3 { font-family: var(--f-display); margin: 0 0 8px; font-size: 19px }
+.finish label { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; border-top: 1px solid var(--line); cursor: pointer }
+.finish input { width: 18px; height: 18px; accent-color: #00875A; margin-top: 2px; flex: none }
+
+@media (max-width: 820px) {
+  .wrap { grid-template-columns: minmax(0,1fr) }
+  .rail { position: static; flex-direction: row; flex-wrap: wrap; gap: 4px }
+  .brand { width: 100% }
+  .chap .n { display: none }
+  .railnote, .bar { width: 100% }
+  .coach { grid-template-columns: minmax(0,1fr) }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important } }
+</style>
+
+<div class="wrap">
+  <nav class="rail" id="rail" aria-label="Chapters"></nav>
+  <main class="main">
+    <section class="coach" id="coach" aria-live="polite"></section>
+    <div class="stagebox" id="stagebox"><div class="stage" id="stage"></div></div>
+    <section class="finish" id="finish" hidden></section>
+  </main>
+</div>
+
+<script>
+/* ---------- Icons: the wave and the sport marks are the app's own drawings (AMS-Icons, 24-pt grid, 1.9 stroke, round ends, no fill);
+   the rest are generic line icons in the same style. ---------- */
+const WAVE = '<path d="M2.5 16.05 3.89 7.95h2.54l1.39 8.1h1.52l1.39-8.1h2.54l1.39 8.1h1.52l1.39-8.1h2.54l1.39 8.1"/>';
+const MARK = {
+  swim: 'M2.6 17.4c1.6-1.3 3-1.3 4.6 0 1.6 1.3 3 1.3 4.6 0 1.6-1.3 3-1.3 4.6 0 1.5 1.3 3 1.3 4.5 0 M2.6 21c1.6-1.3 3-1.3 4.6 0 1.6 1.3 3 1.3 4.6 0 1.6-1.3 3-1.3 4.6 0 1.5 1.3 3 1.3 4.5 0 M7.4 13.6c1.9-1.7 3.9-3.3 6.1-4.7 M10.9 11.1c1.6.4 3.1 1 4.6 1.8 M16.8 6.4c.05-1.05.85-1.85 1.9-1.85 1.05 0 1.85.8 1.85 1.85 0 1.1-.8 1.9-1.85 1.85-1.05-.05-1.9-.85-1.9-1.85Z',
+  bike: 'M2.4 17.1c0-2.2 1.7-3.9 3.9-3.9 2.1 0 3.8 1.7 3.8 3.9 0 2.1-1.7 3.8-3.8 3.8-2.2 0-3.9-1.7-3.9-3.8Z M14 17.1c0-2.2 1.7-3.9 3.8-3.9 2.2 0 3.9 1.7 3.9 3.9 0 2.1-1.7 3.8-3.9 3.8-2.1 0-3.8-1.7-3.8-3.8Z M6.3 17.1c1.9-2.6 3.8-5 5.9-7.3 1.9 2.4 3.8 4.8 5.6 7.3 M9.1 9.6c2 .2 4 .2 6 0 M14.9 5.3c.9-.1 1.8-.1 2.7 0 M16 5.4c.6 1.5 1.2 2.9 1.9 4.3',
+  run: 'M13.2 4.3c.05-1.15.9-2 2.05-2 1.1 0 1.95.85 1.95 2 0 1.15-.85 2.05-1.95 2-1.15-.05-2.05-.9-2.05-2Z M8.6 21.4c.9-2.2 1.9-4.2 3.1-6.2-1.1-1.2-2.1-2.4-3-3.7 M8.7 11.5c-.2 1.4-.6 2.6-1.2 3.8 M8.7 11.4c1.6-1.6 3.3-2.9 5.2-4 1 1.2 1.7 2.5 2.2 3.9 1.2.5 2.4.9 3.7 1.2 M11.7 15.2c1.4.7 2.5 1.7 3.4 3 .5 1.1.9 2.1 1.2 3.2 M4.3 9.9c1.4-.2 2.8-.2 4.2-.1',
+  strength: 'M2.6 9.6c.1 1.7.1 3.3 0 5 M5.3 7.3c.2 3.1.2 6.2 0 9.4 M18.7 7.2c.2 3.2.2 6.4 0 9.5 M21.4 9.5c.1 1.7.1 3.4 0 5.1 M5.4 12c4.4-.3 8.8-.3 13.2 0',
+  rest: 'M8 4.5A8.5 8.5 0 1 0 19.5 16A8.5 8.5 0 0 1 8 4.5Z',
+};
+const TICK = '<path d="M5 12.5l4.5 4.5L19 7"/>';
+const GEAR = '<circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2.3"/>' + Array.from({ length: 8 }, (_, k) => { const a = k * Math.PI / 4, c = Math.cos(a), s = Math.sin(a);
+  return `<path d="M${(12 + c * 6).toFixed(2)} ${(12 + s * 6).toFixed(2)}L${(12 + c * 8.6).toFixed(2)} ${(12 + s * 8.6).toFixed(2)}"/>`; }).join('');
+const ICON = {
+  wave: WAVE, gear: GEAR,
+  panel: 'M5 4.5h14v15H5Z M8.5 9h7 M8.5 12.5h7 M8.5 16h4',
+  pulse: 'M3.5 12h4l2-5 4 10 2-5h5',
+  menu: 'M5 5.5h14 M5 12h14 M5 18.5h9',
+  flag: 'M6 20.5V4 M6 5h12l-2.5 4 2.5 4H6',
+  trophy: 'M7.5 3.5h9v5a4.5 4.5 0 0 1-9 0Z M7.5 5H4.5v1.5a3 3 0 0 0 3.3 3 M16.5 5h3v1.5a3 3 0 0 1-3.3 3 M12 13v3.5 M9.5 16.5h5l1 4h-7Z',
+};
+const icon = (n, cls = 'i') => { const v = ICON[n]; return `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${v[0] === '<' ? v : `<path d="${v}"/>`}</svg>`; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const glyph = (size, sw, inner = WAVE, color = 'currentColor') => `<svg class="tm-glyph" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+const mark = k => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${MARK[k]}"/></svg>`;
+/* The app tile: the white training wave on calm green. */
+const tile = size => `<span class="tm-tile" style="width:${size}px;height:${size}px;border-radius:${size * .26}px" aria-hidden="true">${glyph(size * .82, 2.4, WAVE, '#fff')}</span>`;
+
+/* ---------- The pretend app (simulator). All figures are invented. ---------- */
+const SWIM = { key: 'swim', sport: 'swim', word: 'Swim', len: '40 min', title: 'Drills, easy', state: 'done' };
+const RUN = { key: 'run', sport: 'run', word: 'Run', len: '45 min', title: 'Easy run, flat; keep the pulse low', state: 'todo' };
+const BIKE = { key: 'bike', sport: 'bike', word: 'Bike', len: '1 h 10 min', title: 'Steady ride', state: 'missed' };
+const REST = { key: 'rest', sport: 'rest', word: 'Rest day', len: '', title: '', state: 'rest' };
+const BODY_TODAY = [[0, .3], [.12, .55], [.28, .78], [.45, .6], [.62, .44]];
+const BODY_YEST = [[0, .34], [.1, .52], [.27, .88], [.5, .62], [.7, .4], [.9, .2], [1, .3]];
+const START = () => ({
+  panel: false, settings: false, spage: 'settings', menu: false,
+  note: true, sessions: [{ ...SWIM }, { ...RUN }], tomorrow: 'Bike, 1 h 10 min', week: '40 min done of 3 h 35 min planned', weekShare: 40 / 215,
+  src: 'board', quiet: true, login: false, busy: false, practice: [], toast: '',
+});
+let S = START();
+const set = o => Object.assign(S, o);
+const timers = [];
+const later = (fn, ms) => { const h = setTimeout(fn, ms); timers.push(h); return h; };
+const clearTimers = () => { while (timers.length) clearTimeout(timers.pop()); };
+/* Every step starts from a full reset, then says what it needs. */
+const scene = o => { clearTimers(); S = Object.assign(START(), o); };
+
+const STATE_WORD = { todo: 'to do', done: 'done', missed: 'missed', rest: 'rest day' };
+const length = s => s.len ? `${s.word} ${s.len}` : s.word;
+const battery = () => S.src === 'board' || S.src === 'triathlon' ? 44 : null;
+const hoverWords = () => {
+  let first;
+  if (S.note) { const l = S.sessions.filter(s => s.state !== 'rest').map(s => `${length(s)}, ${STATE_WORD[s.state]}`); first = l.length ? l.join(' · ') : 'Rest day'; }
+  else first = 'No note for today yet';
+  return first + '\n' + (battery() != null ? `Body Battery ${battery()}` : 'Body Battery not known');
+};
+const smallWords = () => ({ board: 'watch synced 14:55', triathlon: 'as Triathlon last read it', waiting: 'no reading yet today', none: 'Garmin Board not answering' })[S.src];
+const noteLine = () => S.note ? 'Written by Triathlon at 07:12.' : 'No note for today yet. Triathlon writes it when it opens.';
+const bodyLine = () => ({ board: 'From the Garmin Board on this Mac. Watch synced 14:55.', triathlon: 'The Garmin Board is not answering. Shown as Triathlon last read it.',
+  waiting: 'The Garmin Board answers, but it has no reading for today yet. It comes when the watch has synced.', none: 'The Garmin Board is not answering, and Triathlon has no reading for today.' })[S.src];
+
+/* ---- The panel ---- */
+function sessionRow(s) {
+  const grey = s.state === 'missed', rest = s.state === 'rest';
+  const mk = s.state === 'todo' ? `<span class="tm-pill">to do</span>` : s.state === 'done' ? `<span class="tm-tick"><svg viewBox="0 0 24 24" aria-hidden="true">${TICK}</svg>done</span>` : s.state === 'missed' ? `<span class="tm-miss">missed</span>` : '';
+  return `<button class="tm-sess" style="--ink:${grey ? 'var(--miss)' : `var(--i-${s.sport})`}" data-act="row" data-id="${s.key}" data-t="row-${s.key}" aria-label="${esc(length(s))}, ${STATE_WORD[s.state]}">${mark(s.sport)}<span><span class="tm-sname"><span>${esc(length(s))}</span>${mk}</span>${s.title ? `<small>${esc(s.title)}</small>` : ''}</span></button>`;
+}
+function curveSVG() {
+  const W = 276, H = 74, foot = 14, base = H - foot;
+  const P = ([x, y]) => [3 + x * (W - 6), base - y * (base - 5)];
+  const line = pts => pts.map((p, i) => (i ? 'L' : 'M') + P(p).map(v => v.toFixed(1)).join(' ')).join('');
+  const today = S.src === 'board' || S.src === 'triathlon' ? BODY_TODAY : [], yest = S.src === 'none' ? [] : BODY_YEST;
+  if (!today.length && !yest.length) return '';
+  let g = '';
+  if (today.length > 1) { const a = P(today[0]), z = P(today[today.length - 1]); g += `<path d="${line(today)}L${z[0].toFixed(1)} ${base}L${a[0].toFixed(1)} ${base}Z" fill="rgba(255,255,255,.28)"/>`; }
+  if (yest.length > 1) { g += `<path d="${line(yest)}" fill="none" stroke="var(--t-plum)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const sp = P(yest.find(p => p[0] >= .8) || yest[yest.length - 1]); g += `<text x="${Math.min(Math.max(sp[0], 24), W - 24)}" y="${Math.max(sp[1] - 9, 8)}" text-anchor="middle" font-size="9" font-weight="600" fill="var(--t-plum)">yesterday</text>`; }
+  if (today.length > 1) { g += `<path d="${line(today)}" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`; const z = P(today[today.length - 1]); g += `<circle cx="${z[0].toFixed(1)}" cy="${z[1].toFixed(1)}" r="3.3" fill="#fff"/>`; }
+  [6, 12, 18].forEach(h => { const x = 3 + h / 24 * (W - 6); g += `<path d="M${x} ${base}v3" stroke="rgba(255,255,255,.75)" stroke-width="1"/><text x="${x}" y="${H - 2}" text-anchor="middle" font-size="8.5" font-weight="500" fill="#fff">${String(h).padStart(2, '0')}</text>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true" data-t="curve">${g}</svg>`;
+}
+function panelHTML() {
+  const rest = S.sessions.length === 1 && S.sessions[0].state === 'rest';
+  let today = `<div class="tm-hd" style="color:var(--t-green)" data-t="today">${S.note ? 'Today · Tue 1 Dec' : 'Today'}</div>`;
+  if (S.note) today += S.sessions.map(sessionRow).join('') + (S.sessions.some(s => s.state !== 'rest') ? `<div class="tm-hint" data-t="hint">Click a session to open it in Triathlon</div>` : '');
+  else today += `<div class="tm-quiet" data-t="nonote">No note for today yet. Triathlon writes it when it opens.</div>`;
+  const tom = S.note ? `<div class="tm-blk" style="gap:1px" data-t="tomorrow"><div class="tm-hd" style="color:var(--t-blue)">Tomorrow</div><div class="tm-line">${esc(S.tomorrow)}</div></div>` : '';
+  const wk = S.note ? `<div class="tm-blk" style="gap:2px" data-t="week"><div class="tm-hd" style="color:var(--t-purple)">This week</div><div class="tm-line">${esc(S.week)}</div><div class="tm-weekbar"><i style="width:${Math.max(S.weekShare * 100, 2)}%"></i></div></div>` : '';
+  const num = battery() == null ? '–' : battery();
+  const card = `<div class="tm-card" data-t="bcard"><div class="tm-ctop"><span class="tm-cap">Body Battery</span><span class="tm-bnum">${num}</span><span class="tm-sp"></span><span class="tm-small">${smallWords()}</span></div>${curveSVG()}</div>`;
+  return `<div class="tm-panel" data-t="panel"><div class="tm-ph" data-t="head">${tile(22)}<b>AMS Tria Menu</b><span>0.3.3</span><span class="tm-sp"></span><button class="tm-gear" data-act="gear" data-t="gear" aria-label="Settings" title="Settings"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${GEAR}</svg></button></div>
+    <div class="tm-blk">${today}</div>${tom}${wk}${card}<button class="tm-main" data-act="open-tri" data-t="openbtn">Open Triathlon</button></div>`;
+}
+
+/* ---- Practice box ---- */
+const PRACTICE = {
+  rclick: () => 'Right-click for me',
+  write: () => 'Triathlon writes today’s note',
+  log: () => 'Log the Run on the iPhone',
+  noboard: () => 'The Garmin Board stops answering',
+  nosync: () => 'Early morning: the watch has not synced yet',
+};
+
+/* ---- Settings window ---- */
+const SIGNS = [
+  ['wave-g', 'Green wave in the menu bar', 'The app has today’s note from Triathlon. Click it for today’s sessions and Body Battery.'],
+  ['wave-x', 'Grey wave in the menu bar', 'No note for today yet.'],
+  ['mark', 'A sport’s mark in its colour', 'In a row of the panel: the sport of that session. Swim blue, bike yellow, run green, strength orange, rowing teal, mobility purple, race red. Grey when the session was missed.'],
+  ['moon', 'Moon', 'In a row of the panel: a rest day.'],
+  ['pill', 'Filled pill “to do”', 'This session is still to do. The pill has the sport’s colour.'],
+  ['tick', 'Tick with “done”', 'This session is done. Nothing else is ever a tick.'],
+  ['miss', 'Grey “missed”', 'This session was planned for today and not done.'],
+  ['card', 'Pink card', 'Body Battery.'],
+  ['today', 'White line with a dot', 'Today’s Body Battery so far, softly filled under it. The dot is the newest reading.'],
+  ['yest', 'Thin dark line', 'Yesterday’s Body Battery.'],
+  ['g', 'Green heading', 'Today.'], ['b', 'Blue heading', 'Tomorrow.'], ['p', 'Purple heading', 'This week.'],
+  ['bar', 'Slim purple bar', 'How much of the week’s planned time is done.'],
+  ['btn', 'A button in full colour', 'The main thing to do on that screen.'],
+];
+const swatch = k => ({
+  'wave-g': `<svg viewBox="0 0 24 24" style="color:var(--t-green);width:22px;height:22px;stroke-width:2.3">${WAVE}</svg>`,
+  'wave-x': `<svg viewBox="0 0 24 24" style="color:var(--win-muted);width:22px;height:22px;stroke-width:2.3">${WAVE}</svg>`,
+  mark: `<svg viewBox="0 0 24 24" style="color:var(--i-run)"><path d="${MARK.run}"/></svg>`,
+  moon: `<svg viewBox="0 0 24 24" style="color:var(--i-rest)"><path d="${MARK.rest}"/></svg>`,
+  pill: `<span class="tm-pill" style="--ink:var(--i-run)">to do</span>`,
+  tick: `<span class="tm-tick"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke-width:2.4">${TICK}</svg>done</span>`,
+  miss: `<span class="tm-miss">missed</span>`,
+  card: `<s style="background:var(--t-pink)"></s>`,
+  today: `<s style="background:var(--t-pink);display:grid;place-items:center"><svg viewBox="0 0 34 14" style="width:28px;height:14px;stroke:none"><path d="M3 7h22" stroke="#fff" stroke-width="2.2" stroke-linecap="round" style="stroke:#fff"/><circle cx="25" cy="7" r="3" fill="#fff"/></svg></s>`,
+  yest: `<s style="background:var(--t-pink);display:grid;place-items:center"><svg viewBox="0 0 34 14" style="width:28px;height:14px;stroke:none"><path d="M3 7h22" style="stroke:var(--t-plum)" stroke-width="1.3" stroke-linecap="round"/></svg></s>`,
+  g: `<u style="background:var(--t-green)"></u>`, b: `<u style="background:var(--t-blue)"></u>`, p: `<u style="background:var(--t-purple)"></u>`,
+  bar: `<span class="tm-weekbar" style="width:28px;margin:0"><i style="width:40%"></i></span>`,
+  btn: `<s style="background:#00875A"></s>`,
+})[k];
+const GUIDE = [
+  ['What this app is for', 'AMS Triathlon Training runs on the Mac as an iPad app, and an iPad app cannot put anything in the menu bar.'],
+  ['The menu bar', 'You see one small icon and nothing beside it: the training wave.'],
+  ['The panel', 'At the top are the small app tile (the white training wave on green), the name, the version and the gear button for Settings.'],
+  ['Today\'s sessions', 'The green heading says the day, for example “Today · Tue 1 Dec”. Under it is one row for each session.'],
+  ['Tomorrow and this week', '“Tomorrow” has a blue heading. It names tomorrow’s first session, for example “Bike, 1 h 10 min”, or “Rest day”.'],
+  ['Body Battery', 'The pink card has white words.'],
+  ['Where the figures come from', 'Today’s sessions, tomorrow and the week come from a small note that AMS Triathlon Training (2.8 or newer) writes on this Mac.'],
+  ['Open Triathlon quietly', 'Triathlon writes today’s note only when it opens.'],
+  ['First start', 'Nothing to set up. The app starts reading as soon as it runs.'],
+  ['Settings', 'Open Settings with the gear button in the panel.'],
+  ['A place in sight', 'A new menu bar item can land behind the notch when the bar is full.'],
+  ['Good to know: the limits', 'The app only knows what AMS Triathlon Training has written down and what the Garmin Board says.'],
+];
+const NEWS = [
+  ['0.3.3', 'The Body Battery card in the panel is a bit paler pink, as you asked. Before (0.3.2): a bright pink. Now: a paler pink, a little softer at night. The words on it are still white.'],
+  ['0.3.2', 'The Body Battery card in the panel is a lighter, brighter pink, as you asked. Before: a deep raspberry. Now: a bright pink, a little softer at night. The words on it are still white.'],
+  ['0.3.1', 'The app’s own icon is the wave now too: the white training wave on calm green. Before: a white medal on green.'],
+  ['0.3', 'The menu bar item is now one icon and nothing beside it: the training wave, the green line with three blocks from the icon of AMS Triathlon Training.'],
+  ['0.2', 'The Body Battery card has a new look. Before: the number large on the left and a small curve beside it. Now: “Body Battery” with the number right beside it at the top, and under it a curve as wide as the card.'],
+  ['0.1', 'New app: AMS Tria Menu, a small Mac menu bar app with no Dock icon. It shows today’s training and your Body Battery at a glance. It only reads and never changes your plan.'],
+];
+const sw = (key, label, on, smalls) => `<div data-t="sw-${key}"><div class="tm-row"><b style="font-weight:500">${label}</b><span class="tm-sp"></span><button class="tm-sw ${on ? 'on' : ''}" data-act="sw" data-k="${key}" role="switch" aria-checked="${on}" aria-label="${label}"></button></div>${smalls.map(t => `<small>${t}</small>`).join('')}</div>`;
+function settingsPage() {
+  if (S.spage === 'guide') return `<div class="tm-guide" style="display:flex;flex-direction:column;gap:10px">${GUIDE.map(([t, b]) => `<div><h5>${esc(t)}</h5><p>${esc(b)}</p></div>`).join('')}
+    <div data-t="signs"><h5>Signs in this app</h5><div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">${SIGNS.map(([k, n, m]) => `<div class="tm-sign"><i>${swatch(k)}</i><span><b style="font-weight:600">${esc(n)}</b>: ${esc(m)}</span></div>`).join('')}</div></div></div>`;
+  if (S.spage === 'news') return `<div class="tm-rel" style="display:flex;flex-direction:column;gap:10px" data-t="newslist">${NEWS.map(([v, t]) => `<div><h5>${v} · 26 Nov 2026</h5><p>– ${esc(t)}</p></div>`).join('')}<small>The real list gives every change of every version, newest first.</small></div>`;
+  return `${sw('login', 'Open at login', S.login, ['While this is on, the app also comes back by itself if it ever stops unexpectedly.'])}
+    ${sw('quiet', 'Open Triathlon quietly', S.quiet, ['Triathlon writes today’s note only when it opens. With this on, AMS Tria Menu opens Triathlon in the background, hidden and never in front, when there is no note for today, and again every 30 minutes while a session is still to do.', 'It never touches Triathlon while its window is showing. With this off, the wave stays grey until you open Triathlon yourself.'])}
+    <div data-t="sec-figures"><h5 style="font-size:14px;color:var(--t-green)">Where the figures come from</h5>
+      <div class="tm-fig" style="margin-top:5px"><b>Today’s note</b><span>${esc(noteLine())}</span></div>
+      <div class="tm-fig" style="margin-top:5px"><b>Body Battery</b><span>${esc(bodyLine())}</span></div>
+      <div style="margin-top:7px"><button class="tm-mbtn" data-act="refresh" data-t="refresh">${S.busy ? 'Refreshing…' : 'Refresh now'}</button></div>
+      <small style="margin-top:7px">Nothing leaves this Mac. The app only reads: it never changes your plan, and it holds no Garmin key.</small></div>`;
+}
+function settingsHTML() {
+  return `<div class="tm-win tm-set" data-t="settings"><div class="tm-tb"><span class="tm-dots"><i data-act="close-settings"></i><i></i><i></i></span><span class="tm-ttl">AMS Tria Menu</span></div>
+    <div class="tm-sh">${tile(26)}<b>AMS Tria Menu</b><span>0.3.3</span></div>
+    <div class="tm-tabs">${[['settings', 'Settings'], ['guide', 'How it works'], ['news', 'What’s new']].map(([k, l]) => `<button class="t-${k} ${S.spage === k ? 'on' : ''}" data-act="spage" data-p="${k}" data-t="tab-${k}">${l}</button>`).join('')}</div>
+    <div class="tm-pane">${settingsPage()}</div>
+    <div class="tm-sfoot">Version 0.3.3 (6)<span class="tm-sp"></span><button class="tm-mbtn" data-act="none">Quit AMS Tria Menu</button><button class="tm-mbtn prim" data-act="close-settings" data-t="done">Done</button></div></div>`;
+}
+
+function renderStage() {
+  const st = document.getElementById('stage'), oldPane = st.querySelector('.tm-pane'), keep = oldPane ? oldPane.scrollTop : 0;
+  const bar = `<div class="tm-mbar"><b>Finder</b><span>File</span><span>Edit</span><span>View</span><span>Go</span><span class="tm-sp"></span>
+      <button class="tm-item ${S.panel || S.menu ? 'open' : ''}" data-act="item" data-t="item" aria-label="AMS Tria Menu, ${S.note ? 'green wave, today’s note is there' : 'grey wave, no note for today yet'}" style="color:${S.note ? 'var(--t-green)' : 'var(--win-muted)'}">${glyph(20, 2.3, WAVE)}<span class="tm-tip">${esc(hoverWords()).replace('\n', '<br>')}</span></button>
+      <span>Tue 1 Dec&nbsp; 15:05</span></div>`;
+  const menu = S.menu ? `<div class="tm-ctx" data-t="menu" role="menu"><button data-act="m-open" data-t="m-open">Open Triathlon</button><button data-act="m-refresh" data-t="m-refresh">Refresh now</button><button data-act="m-settings" data-t="m-settings">Settings…</button></div>` : '';
+  const practice = S.practice.length ? `<div class="tm-practice" data-t="practice"><small>Practice box. It is not in the real app. It stands in for things that happen on your Mac.</small>${S.practice.map(k => `<button data-act="p-${k}" data-t="p-${k}">${PRACTICE[k]()}</button>`).join('')}</div>` : '';
+  st.innerHTML = `${bar}${S.panel ? panelHTML() : ''}${menu}${practice}${S.settings ? settingsHTML() : ''}${S.toast ? `<div class="tm-toast">${esc(S.toast)}</div>` : ''}`;
+  const np = st.querySelector('.tm-pane'); if (np) np.scrollTop = keep;
+  markTarget();
+}
+function toast(t) { S.toast = t; renderStage(); clearTimeout(toast.h); toast.h = setTimeout(() => { S.toast = ''; renderStage(); }, 2600); }
+function openMenu() { set({ panel: false, menu: !S.menu }); renderStage(); if (S.menu) emit('menu-open'); }
+
+const stage = document.getElementById('stage');
+stage.addEventListener('contextmenu', ev => { if (ev.target.closest('.tm-item')) { ev.preventDefault(); openMenu(); } });
+stage.addEventListener('mouseover', ev => { if (ev.target.closest('.tm-item')) emit('hover'); });
+
+/* Clicks inside the pretend Mac */
+stage.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act]');
+  if (!el) {
+    if (S.panel && !ev.target.closest('.tm-panel, .tm-practice')) { S.panel = false; renderStage(); emit('panel-close'); }
+    else if (S.menu && !ev.target.closest('.tm-ctx, .tm-practice')) { S.menu = false; renderStage(); }
+    return; }
+  const a = el.dataset.act, id = el.dataset.id;
+  switch (a) {
+    case 'item': if (ev.ctrlKey) { openMenu(); break; }
+      set({ menu: false, panel: !S.panel }); if (S.panel) set({ settings: false }); renderStage(); emit(S.panel ? 'panel-open' : 'panel-close'); break;
+    case 'gear': set({ panel: false, settings: true, spage: 'settings' }); renderStage(); emit('settings'); break;
+    case 'row': set({ panel: false }); renderStage(); toast('Triathlon opens that session (practice copy)'); emit('row', id); break;
+    case 'open-tri': set({ panel: false }); renderStage(); toast('Triathlon comes to the front (practice copy)'); emit('open-tri'); break;
+    case 'm-open': set({ menu: false }); renderStage(); toast('Triathlon comes to the front (practice copy)'); emit('open-tri'); break;
+    case 'm-refresh': set({ menu: false }); renderStage(); toast('Reading the note and asking the Board again'); emit('refresh'); break;
+    case 'm-settings': set({ menu: false, settings: true, spage: 'settings' }); renderStage(); emit('settings'); break;
+    case 'spage': S.spage = el.dataset.p; renderStage(); emit('tab', S.spage); break;
+    case 'close-settings': S.settings = false; renderStage(); emit('settings-close'); break;
+    case 'sw': { const k = el.dataset.k; S[k] = !S[k]; renderStage(); emit('sw', { k, on: S[k] }); break; }
+    case 'refresh':
+      if (S.busy) break;
+      S.busy = true; renderStage(); emit('refresh'); later(() => { S.busy = false; renderStage(); }, 1500); break;
+    case 'p-rclick': openMenu(); break;
+    case 'p-write': S.note = true; renderStage(); emit('note-written'); break;
+    case 'p-log': S.sessions = S.sessions.map(s => s.key === 'run' ? { ...s, state: 'done' } : s); S.week = '1 h 25 min done of 3 h 35 min planned'; S.weekShare = 85 / 215; renderStage(); emit('logged'); break;
+    case 'p-noboard': S.src = 'triathlon'; renderStage(); emit('src', 'triathlon'); break;
+    case 'p-nosync': S.src = 'waiting'; renderStage(); emit('src', 'waiting'); break;
+    default: break;
+  }
+});
+document.addEventListener('keydown', ev => {
+  if (ev.key !== 'Escape') return;
+  if (S.settings) { S.settings = false; renderStage(); emit('settings-close'); }
+  else if (S.menu) { S.menu = false; renderStage(); }
+  else if (S.panel) { S.panel = false; renderStage(); emit('panel-close'); }
+});
+
+/* ---------- Lessons (see → try → check). Every step's setup resets what that step needs. ---------- */
+const PANEL = { panel: true };
+const SETTINGS_ON = { settings: true, spage: 'settings' };
+const LESSONS = [
+  { title: 'The wave in the menu bar', icon: 'wave', steps: [
+    { kind: 'look', head: 'One small icon', text: 'The training wave: the line with three blocks from the icon of AMS Triathlon Training. Nothing stands beside it, and the app has no Dock icon. It only reads; it never changes your plan.', target: 'item', setup: () => scene({}) },
+    { kind: 'look', head: 'Green and grey', text: 'The wave is green while the app has today’s note from Triathlon. It is grey while there is no note for today yet. It does not change with the session, and there is no number beside it.', target: 'item', setup: () => scene({ note: false }) },
+    { kind: 'try', head: 'Point at the wave', text: 'Move the pointer onto the wave and wait a moment.', target: 'item', setup: () => scene({}), wait: 'hover', ok: 'It says the sessions in words, here “Swim 40 min, done · Run 45 min, to do”, and under that “Body Battery 44”. A click opens the panel.' },
+    { kind: 'try', head: 'A grey wave turns green', text: 'There is no note for today yet. Triathlon writes it when it opens. In the practice box, press “Triathlon writes today’s note”.', hint: 'With “Open Triathlon quietly” on, the real app opens Triathlon in the background for you.', target: 'p-write', setup: () => scene({ note: false, practice: ['write'] }), wait: 'note-written', ok: 'The wave is green now. The Mac’s own words said “No note for today yet” before.' },
+    { kind: 'try', head: 'Right-click the wave', text: 'Right-click the wave, or hold the control key and click it.', hint: 'No right button? The practice box has a button for it.', target: 'item', setup: () => scene({ practice: ['rclick'] }), wait: 'menu-open', ok: 'A short menu: “Open Triathlon”, “Refresh now” and “Settings…”. “Refresh now” reads and asks again at once.' },
+    { kind: 'check', head: 'Quick check', text: 'The wave in the menu bar is grey. What does that mean?', answers: ['There is no note for today yet', 'Your Body Battery is low', 'It is a rest day'], right: 0, ok: 'Right. A rest day still has a note, so the wave stays green. Grey is never red; it only says nothing is known.', setup: () => scene({ note: false }) },
+  ]},
+  { title: 'The panel', icon: 'panel', steps: [
+    { kind: 'try', head: 'Open the panel', text: 'Click the wave.', target: 'item', setup: () => scene({}), wait: 'panel-open', ok: 'The panel opens under the wave: today, tomorrow, this week, Body Battery and one green button.' },
+    { kind: 'look', head: 'The top line', text: 'The small app tile (the white wave on green), “AMS Tria Menu”, the version, and the gear for Settings.', target: 'head', setup: () => scene(PANEL) },
+    { kind: 'look', head: 'Today', text: 'A green heading with the day: “Today · Tue 1 Dec”. Under it is one row for each session.', target: 'today', setup: () => scene(PANEL) },
+    { kind: 'look', head: 'A row', text: 'The sport’s mark in its colour, then the sport with its length: “Run 45 min”. Right beside it a small filled pill “to do” in the sport’s colour, or a green tick with “done”. Under that, in small grey words, the session’s title.', target: 'row-run', setup: () => scene(PANEL) },
+    { kind: 'try', head: 'Open a session', text: 'Click the row “Run 45 min”.', target: 'row-run', setup: () => scene(PANEL), wait: 'row', ok: 'That session opens in AMS Triathlon Training and the panel closes. The grey line under the rows says so: “Click a session to open it in Triathlon”.' },
+    { kind: 'try', head: 'A session gets done', text: 'There is no “done” button on the Mac. Only the iPhone logs a session. In the practice box, press “Log the Run on the iPhone”.', hint: 'The real app opens Triathlon quietly again within 30 minutes, so it reads the plan afresh.', target: 'p-log', setup: () => scene({ panel: true, practice: ['log'] }), wait: 'logged', ok: 'The “to do” pill became a green tick with “done”, and the bar under “This week” grew.' },
+    { kind: 'look', head: 'A rest day', text: 'One row with the moon and the words “Rest day”. The wave stays green, because the note is there.', target: 'row-rest', setup: () => scene({ panel: true, sessions: [{ ...REST }], tomorrow: 'Swim, 40 min' }) },
+    { kind: 'look', head: 'Tomorrow and this week', text: '“Tomorrow” has a blue heading and names tomorrow’s first session, for example “Bike, 1 h 10 min”, or “Rest day”. “This week” has a purple heading and a slim purple bar, filled to the share that is done.', target: 'week', setup: () => scene(PANEL) },
+    { kind: 'look', head: 'No note for today', text: 'Grey words say why. For example: “No note for today yet. Triathlon writes it when it opens.” Other words say that Triathlon is not on this Mac, or that the Mac did not let the app read the note.', target: 'nonote', setup: () => scene({ panel: true, note: false }) },
+    { kind: 'check', head: 'Quick check', text: 'What does a click on a session row do?', answers: ['It opens that session in Triathlon', 'It marks the session done', 'It changes the plan'], right: 0, ok: 'Right. The app only reads. It never marks or changes anything.', setup: () => scene(PANEL) },
+  ]},
+  { title: 'Body Battery', icon: 'pulse', steps: [
+    { kind: 'look', head: 'The pink card', text: '“Body Battery” with the number right beside it, and at the right small words such as “watch synced 14:55”: when your watch last sent its readings. When it was not today, the weekday stands in front of the time. White words on pink.', target: 'bcard', setup: () => scene(PANEL) },
+    { kind: 'look', head: 'The curve', text: 'Today is a white line with a dot at the newest reading, and the ground under it is softly filled. Yesterday is a thin dark plum line with the word “yesterday”. It runs from midnight to midnight: the figures 06, 12 and 18 are the hours. The bottom line is 0, the top of the card is 100.', target: 'curve', setup: () => scene(PANEL) },
+    { kind: 'try', head: 'The Garmin Board stops', text: 'The numbers come from your AMS Garmin Bridge Board on this Mac. In the practice box, press “The Garmin Board stops answering”.', target: 'p-noboard', setup: () => scene({ panel: true, practice: ['noboard'] }), wait: 'src', when: d => d === 'triathlon', ok: 'The small words now say “as Triathlon last read it”: the app uses the reading Triathlon saved. If neither is there you see a dash and “Garmin Board not answering”.' },
+    { kind: 'try', head: 'Before the first sync', text: 'In the practice box, press “Early morning: the watch has not synced yet”.', target: 'p-nosync', setup: () => scene({ panel: true, practice: ['nosync'] }), wait: 'src', when: d => d === 'waiting', ok: 'A dash and “no reading yet today”. The app never shows yesterday’s number as today’s.' },
+    { kind: 'try', head: 'Open Triathlon', text: 'Press the green button “Open Triathlon”.', target: 'openbtn', setup: () => scene(PANEL), wait: 'open-tri', ok: 'It brings AMS Triathlon Training to the front. The same button is in the right-click menu. It is full colour because it is the main thing to do here.' },
+    { kind: 'check', head: 'Quick check', text: 'The number shows a dash and the words “no reading yet today”. Why?', answers: ['The watch has not synced since midnight', 'Your Body Battery is zero', 'Triathlon is not installed'], right: 0, ok: 'Right. Body Battery only changes when the watch syncs, so the line has few corners.', setup: () => scene({ panel: true, src: 'waiting' }) },
+  ]},
+  { title: 'Settings, How it works, What’s new', icon: 'gear', steps: [
+    { kind: 'try', head: 'Open Settings', text: 'Press the gear in the panel.', target: 'gear', setup: () => scene(PANEL), wait: 'settings', ok: 'Settings opens in its own window with three tabs. “Settings…” in the right-click menu opens the same window.' },
+    { kind: 'look', head: 'The Settings tab', text: '“Open at login” (the app also comes back by itself if it ever stops unexpectedly), “Open Triathlon quietly”, and the section “Where the figures come from” with two lines: today’s note, and Body Battery.', target: 'sec-figures', setup: () => scene(SETTINGS_ON) },
+    { kind: 'try', head: 'Open Triathlon quietly', text: 'It is on at first. Switch it off.', hint: 'Triathlon writes today’s note only when it opens. On: the app opens it hidden, never in front, when there is no note, and again every 30 minutes while a session is to do. Off: the wave stays grey until you open Triathlon yourself.', target: 'sw-quiet', setup: () => scene(SETTINGS_ON), wait: 'sw', when: d => d.k === 'quiet' && !d.on, ok: 'Off. Switch it on again if you want the note to arrive by itself.' },
+    { kind: 'try', head: 'Refresh now', text: 'Press “Refresh now” under “Where the figures come from”.', target: 'refresh', setup: () => scene(SETTINGS_ON), wait: 'refresh', ok: 'The app reads again and asks the Garmin Board at once. It says “Refreshing…” for a moment. It works even with the quiet switch off.' },
+    { kind: 'try', head: 'How it works', text: 'Press the tab “How it works”.', target: 'tab-guide', setup: () => scene(SETTINGS_ON), wait: 'tab', when: d => d === 'guide', ok: 'A guide to the whole app, in short parts such as “The panel” and “Open Triathlon quietly”, and at the end “Signs in this app”.' },
+    { kind: 'try', head: 'What’s new', text: 'Press the tab “What’s new”.', target: 'tab-news', setup: () => scene({ ...SETTINGS_ON, spage: 'guide' }), wait: 'tab', when: d => d === 'news', ok: 'Every version, newest first, with what was before and what is now. The version also shows at the bottom: “Version 0.3.3 (6)”.' },
+    { kind: 'try', head: 'Done', text: 'Press the green “Done” button.', hint: 'The Escape key closes the window too. “Quit AMS Tria Menu” is beside it.', target: 'done', setup: () => scene({ ...SETTINGS_ON, spage: 'news' }), wait: 'settings-close', ok: 'The window closes. Only one copy of the app runs.' },
+  ]},
+  { title: 'Signs in this app', icon: 'flag', steps: [
+    { kind: 'look', head: 'The list in the guide', text: 'The tab “How it works” ends with “Signs in this app”: every mark and colour that means something, each drawn as it looks. This chapter walks through them.', target: 'signs', setup: () => scene({ ...SETTINGS_ON, spage: 'guide' }) },
+    { kind: 'look', head: 'The wave', text: 'Green wave: the app has today’s note from Triathlon. Grey wave: no note for today yet. Grey means nothing is known. Grey is never red.', target: 'item', setup: () => scene({}) },
+    { kind: 'look', head: 'Headings and the bar', text: 'Green heading: today. Blue heading: tomorrow. Purple heading: this week, with the slim purple bar for how much of the planned time is done.', target: 'week', setup: () => scene(PANEL) },
+    { kind: 'look', head: 'Marks in the rows', text: 'A sport’s mark has the sport’s colour: swim blue, bike yellow, run green, strength orange, rowing teal, mobility purple, race red. Filled pill “to do”: still to do. Tick with “done”: done, and nothing else is ever a tick. Grey “missed”: planned for today and not done. Moon: a rest day.', target: 'row-bike', setup: () => scene({ panel: true, sessions: [{ ...SWIM }, { ...RUN }, { ...BIKE }] }) },
+    { kind: 'look', head: 'The pink card and the button', text: 'Pink: Body Battery. White line with a dot: today so far, the dot is the newest reading. Thin dark line: yesterday. A button in full colour is the main thing to do on that screen.', target: 'bcard', setup: () => scene(PANEL) },
+    { kind: 'check', head: 'Quick check', text: 'You see a green tick with the word “done” beside a session. What does it mean?', answers: ['That session is done', 'Triathlon has written today’s note', 'Your Body Battery is good'], right: 0, ok: 'Right. Nothing else in the app is ever a tick.', setup: () => scene(PANEL) },
+  ]},
+];
+
+/* ---------- Tour engine (reusable) ---------- */
+let ci = 0, si = 0, solved = false, targetOff = false;
+const store = { get(k) { try { return localStorage.getItem(k) } catch { return null } }, set(k, v) { try { localStorage.setItem(k, v) } catch {} } };
+let doneChapters = new Set(JSON.parse(store.get('triamenu-done') || '[]'));
+
+function emit(name, data) {
+  const st = LESSONS[ci]?.steps[si]; if (!st || solved || st.kind !== 'try') return;
+  if (st.on && st.on[name]) { markTarget(st.on[name]); return; }
+  if ((st.wait === name || st.alt === name) && (!st.when || st.when(data))) succeed(st.ok);
+}
+function succeed(msg) {
+  solved = true; targetOff = true; const fb = document.getElementById('fb'); if (fb) { fb.textContent = '✓ ' + msg; fb.className = 'feedback'; }
+  const nx = document.getElementById('next'); if (nx) { nx.disabled = false; nx.focus({ preventScroll: true }); }
+  markTarget();
+}
+let curTarget = null;
+function markTarget(t) {
+  if (t !== undefined) curTarget = t;
+  document.querySelectorAll('.target').forEach(e => e.classList.remove('target'));
+  if (!curTarget || targetOff) return;
+  const q = n => document.querySelector(`#stage [data-t="${CSS.escape(n)}"]`);
+  // If the thing to click is out of sight (a window or the panel was closed), point at the way back to it.
+  const el = q(curTarget) || (S.settings ? q('done') : S.panel ? q('gear') : q('item'));
+  if (el) {
+    el.classList.add('target');
+    const pane = el.closest('.tm-pane');
+    if (pane && pane !== el) { let top = 0, n = el; while (n && n !== pane) { top += n.offsetTop; n = n.offsetParent; } const bot = top + el.offsetHeight; if (top < pane.scrollTop || bot > pane.scrollTop + pane.clientHeight) pane.scrollTop = Math.max(0, top - 40); }
+  }
+}
+function renderRail() {
+  const total = LESSONS.reduce((n, l) => n + l.steps.length, 0);
+  const before = LESSONS.slice(0, ci).reduce((n, l) => n + l.steps.length, 0) + si;
+  document.getElementById('rail').innerHTML = `<div class="brand">${tile(40)}<div><h1>Tria Menu Tour</h1><small>Learn the app in about 8 minutes</small></div></div>
+    ${LESSONS.map((l, i) => `<button class="chap ${i === ci ? 'cur' : ''} ${doneChapters.has(i) ? 'done' : ''}" data-ch="${i}">${icon(l.icon)}<span>${l.title}</span><span class="n">${doneChapters.has(i) ? '✓' : l.steps.length + ' steps'}</span></button>`).join('')}
+    <button class="chap ${ci === LESSONS.length ? 'cur' : ''}" data-ch="${LESSONS.length}">${icon('trophy')}<span>On your Mac</span></button>
+    <div class="bar"><i style="width:${Math.round(100 * Math.min(before, total) / total)}%"></i></div>
+    <p class="railnote">Everything here is a practice copy. Nothing changes on your Mac.</p>`;
+}
+document.getElementById('rail').addEventListener('click', e => { const b = e.target.closest('[data-ch]'); if (b) goChapter(+b.dataset.ch); });
+
+function goChapter(i) {
+  ci = i; si = 0; clearTimers(); S = START();
+  const L = LESSONS[i]; if (L && L.setup) L.setup();   // bring the pretend Mac to where that chapter starts
+  renderStep();
+}
+
+function renderStep() {
+  renderRail();
+  const coach = document.getElementById('coach'), fin = document.getElementById('finish');
+  if (ci >= LESSONS.length) { renderFinish(); coach.hidden = true; return; }
+  coach.hidden = false; fin.hidden = true;
+  const L = LESSONS[ci], st = L.steps[si];
+  solved = st.kind === 'look'; targetOff = false;
+  if (st.setup) st.setup();
+  S.toast = '';
+  const kindName = { look: 'Look', try: 'Try it', check: 'Check' }[st.kind];
+  coach.innerHTML = `<div class="eyebrow">${icon(L.icon)} ${esc(L.title)} <span class="kind">· ${kindName} · step ${si + 1} of ${L.steps.length}</span></div>
+    <div><h2>${esc(st.head)}</h2><p>${esc(st.text)}</p>${st.hint ? `<p style="color:var(--muted);font-size:13px">${esc(st.hint)}</p>` : ''}</div>
+    <div class="btns">${ci + si > 0 ? '<button class="btn ghost" id="back">Back</button>' : ''}<button class="btn main-b" id="next" ${solved ? '' : 'disabled'}>${si === L.steps.length - 1 ? 'Finish chapter' : 'Next'}</button></div>
+    ${st.kind === 'check' ? `<div class="answers">${st.answers.map((a, i) => `<button class="ans" data-a="${i}">${esc(a)}</button>`).join('')}</div>` : ''}
+    <p class="feedback" id="fb"></p>`;
+  curTarget = st.target || null;
+  renderStage();
+  if (st.kind === 'check') coach.querySelectorAll('.ans').forEach(b => b.onclick = () => {
+    const fb = document.getElementById('fb');
+    if (+b.dataset.a === st.right) { coach.querySelectorAll('.ans').forEach(x => x.disabled = true); b.classList.add('right'); succeed(st.ok); }
+    else { b.classList.add('wrong'); fb.textContent = 'Not quite. Try another answer.'; fb.className = 'feedback no'; }
+  });
+  document.getElementById('next').onclick = next;
+  const bk = document.getElementById('back'); if (bk) bk.onclick = back;
+}
+function next() {
+  const L = LESSONS[ci];
+  if (si < L.steps.length - 1) { si++; renderStep(); return; }
+  doneChapters.add(ci); store.set('triamenu-done', JSON.stringify([...doneChapters]));
+  goChapter(ci + 1);
+}
+function back() { if (si > 0) { si--; renderStep(); } else if (ci > 0) { goChapter(ci - 1); } }
+
+function renderFinish() {
+  const fin = document.getElementById('finish'); fin.hidden = false;
+  clearTimers(); S = START(); curTarget = null; renderStage();
+  const items = ['Rest the pointer on the wave in your menu bar and read the words: the sessions, and Body Battery.',
+    'Click the wave and read the panel from top to bottom: Today, Tomorrow, This week, and the pink Body Battery card.',
+    'Click a session row and see it open in AMS Triathlon Training. Come back with the wave.',
+    'Right-click (or control-click) the wave and look for “Open Triathlon”, “Refresh now” and “Settings…”.',
+    'Open Settings with the gear. Look at “Open at login” and “Open Triathlon quietly” and decide which you want.',
+    'Press “Refresh now” and read the two lines under “Where the figures come from”.',
+    'Read “How it works”, down to “Signs in this app”, and look at “What’s new”.',
+    'Tomorrow morning: is the wave green without you opening Triathlon? Then the quiet opening works.'];
+  let ticks = JSON.parse(store.get('triamenu-real') || '[]');
+  fin.innerHTML = `<h3>Now try it on your real Mac</h3>${items.map((t, i) => `<label><input type="checkbox" id="real-${i}" ${ticks.includes(i) ? 'checked' : ''}><span>${esc(t)}</span></label>`).join('')}
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn main-b" id="again">Start the tour again</button></div>`;
+  fin.querySelectorAll('input').forEach((c, i) => c.onchange = () => { ticks = ticks.filter(x => x !== i); if (c.checked) ticks.push(i); store.set('triamenu-real', JSON.stringify(ticks)); });
+  document.getElementById('again').onclick = () => goChapter(0);
+}
+
+/* Fit the 960×560 pretend Mac into its box */
+function fit() { const box = document.getElementById('stagebox'); document.getElementById('stage').style.transform = `scale(${box.clientWidth / 960})`; }
+new ResizeObserver(fit).observe(document.getElementById('stagebox'));
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName !== 'INPUT') { const n = document.getElementById('next'); if (n && !n.disabled && document.activeElement !== n) n.click(); } });
+goChapter(0); fit();
+</script>
