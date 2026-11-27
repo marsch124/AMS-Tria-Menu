@@ -62,6 +62,13 @@ final class AppModel: ObservableObject {
     private var boardTried: Date?
     private var shownDay = ""
     private var lastNoNote: NoNote?
+    /// The copy of Triathlon this app opened hidden, to close again once its note is written.
+    private var ownCopy: NSRunningApplication?
+    private var ownCopyOpened: Date?
+    /// He opened Triathlon through the panel since the hidden copy was opened: never close it then.
+    private var openedByHimSince = false
+    /// False while the screens or the Mac sleep (lid closed, a dark wake): Triathlon is never opened then.
+    private var screensAsleep = false
 
     init(live: Bool = true) {
         self.live = live
@@ -74,13 +81,24 @@ final class AppModel: ObservableObject {
         timer.tolerance = 5
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
-        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(woke), name: NSWorkspace.didWakeNotification, object: nil)
+        let center = NSWorkspace.shared.notificationCenter
+        center.addObserver(self, selector: #selector(woke), name: NSWorkspace.didWakeNotification, object: nil)
+        center.addObserver(self, selector: #selector(screensSlept), name: NSWorkspace.willSleepNotification, object: nil)
+        center.addObserver(self, selector: #selector(screensSlept), name: NSWorkspace.screensDidSleepNotification, object: nil)
+        center.addObserver(self, selector: #selector(screensWoke), name: NSWorkspace.screensDidWakeNotification, object: nil)
         look()
     }
 
     @objc private func woke() {
+        screensAsleep = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in self?.look() }
     }
+
+    @objc private func screensSlept() { screensAsleep = true }
+    @objc private func screensWoke() { screensAsleep = false }
+
+    /// The Mac is awake with its screens on: only then is Triathlon opened.
+    private var macAwake: Bool { !screensAsleep && CGDisplayIsAsleep(CGMainDisplayID()) == 0 }
 
     // MARK: Looking
 
@@ -210,35 +228,20 @@ final class AppModel: ObservableObject {
     }
 
     /// Opens Triathlon in the background when its note is not today's, and again each half hour while a
-    /// session is still to do. Rule: `QuietOpen`.
+    /// session is still to do; closes that copy again once the note is written. A running Triathlon is never
+    /// touched, and nothing happens while the Mac sleeps. Rule: `QuietOpen`.
     private func quietStep(asked: Bool) {
-        guard live else { return }
+        guard live, !busy else { return }
         let store = UserDefaults.standard
         let last = store.object(forKey: Self.lastTryKey) as? Double
-        let app = runningTriathlon
         let step = QuietOpen.step(on: quietOn, installed: Places.triathlonApp != nil, noteIsToday: note != nil,
-                                  hasToDo: note?.hasToDo ?? false, running: app != nil,
-                                  showing: app.map { $0.isActive || !$0.isHidden } ?? false,
+                                  hasToDo: note?.hasToDo ?? false, running: runningTriathlon != nil, macAwake: macAwake,
                                   sinceLastTry: last.map { Date().timeIntervalSince1970 - $0 }, asked: asked)
-        guard step != .nothing else { return }
+        guard step == .open else { return }
         store.set(Date().timeIntervalSince1970, forKey: Self.lastTryKey)
         busy = true
-        if step == .restart, let app {
-            Diary.note("Triathlon runs hidden; closing it and opening it hidden again for a fresh note")
-            app.terminate()
-            waitUntilGone(app, tries: 20) { [weak self] in self?.openHidden() }
-        } else {
-            Diary.note("Opening Triathlon in the background for today's note")
-            openHidden()
-        }
-    }
-
-    private func waitUntilGone(_ app: NSRunningApplication, tries: Int, then: @escaping () -> Void) {
-        if app.isTerminated || tries == 0 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: then)
-        } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in self?.waitUntilGone(app, tries: tries - 1, then: then) }
-        }
+        Diary.note("Opening Triathlon in the background for today's note")
+        openHidden()
     }
 
     private func openHidden() {
@@ -247,24 +250,55 @@ final class AppModel: ObservableObject {
         how.activates = false
         how.hides = true
         how.addsToRecentItems = false
-        NSWorkspace.shared.openApplication(at: url, configuration: how) { _, error in
-            if let error { DispatchQueue.main.async { Diary.note("Triathlon did not open: \(error.localizedDescription)") } }
+        ownCopy = nil
+        ownCopyOpened = Date()
+        openedByHimSince = false
+        NSWorkspace.shared.openApplication(at: url, configuration: how) { app, error in
+            DispatchQueue.main.async { [weak self] in
+                if let error { Diary.note("Triathlon did not open: \(error.localizedDescription)") }
+                self?.ownCopy = app
+            }
         }
-        readSoon([3, 8, 20])
+        readSoon([3, 8, QuietOpen.closeAfter]) { [weak self] in self?.closeOwnCopy() }
+    }
+
+    /// Closes the hidden copy this app opened, once its note is written — while it is still awake, so it can
+    /// answer. A copy he brought to the front, or opened himself since, stays open.
+    private func closeOwnCopy() {
+        let opened = ownCopyOpened ?? .distantFuture
+        ownCopyOpened = nil
+        // The copy from the open call; failing that, a Triathlon that started after that call.
+        guard let app = ownCopy ?? runningTriathlon.flatMap({ ($0.launchDate ?? .distantPast) >= opened.addingTimeInterval(-2) ? $0 : nil })
+        else { return }
+        ownCopy = nil
+        guard !app.isTerminated else { return }
+        guard QuietOpen.closeOwnCopy(stillRunning: true, hidden: app.isHidden, active: app.isActive, openedByHimSince: openedByHimSince) else {
+            Diary.note("Triathlon is in front now; left open")
+            return
+        }
+        Diary.note("Today's note read; closing the hidden Triathlon again")
+        app.terminate()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+            if !app.isTerminated { Diary.note("Triathlon did not close yet; left alone") }
+        }
     }
 
     /// Reads the note again a few times after Triathlon was opened: it writes within seconds.
-    private func readSoon(_ seconds: [Double]) {
+    private func readSoon(_ seconds: [Double], then last: (() -> Void)? = nil) {
         for (index, wait) in seconds.enumerated() {
             DispatchQueue.main.asyncAfter(deadline: .now() + wait) { [weak self] in
                 self?.readNote(then: nil)
-                if index == seconds.count - 1 { self?.busy = false }
+                if index == seconds.count - 1 {
+                    self?.busy = false
+                    last?()
+                }
             }
         }
     }
 
     /// Brings Triathlon to the front, at a session when there is one. Only Triathlon's own links are followed.
     func openTriathlon(_ session: TodayNote.Session? = nil) {
+        openedByHimSince = true
         guard let app = Places.triathlonApp else { return }
         let how = NSWorkspace.OpenConfiguration()
         how.activates = true

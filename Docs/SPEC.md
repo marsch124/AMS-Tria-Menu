@@ -1,4 +1,4 @@
-# AMS Tria Menu 0.4 (build 8, 27 Nov 2026) - Specification
+# AMS Tria Menu 0.4.1 (build 9, 27 Nov 2026) - Specification
 
 ## Purpose
 
@@ -57,13 +57,19 @@ There is no "done" button. Triathlon cannot log a session on the Mac (only the i
 
 Triathlon writes today's note only when it opens. A switch in Settings, "Open Triathlon quietly" (on at first), lets the app open it in the background: hidden, never in front, no window. The note is there a few seconds later.
 
+- Opens Triathlon only when it is not running. It never closes, and never opens again, a Triathlon that is already running, whether in front, behind other windows or hidden (so it never touches one the owner opened himself).
 - No note for today (each morning, or after midnight): open Triathlon hidden. If a try brings no note, wait 20 minutes before the next.
-- While a session is still to do: again every 30 minutes. If Triathlon still runs hidden, it is closed politely and opened hidden again, so it reads the plan afresh. That way a session logged on the iPhone turns into the green tick.
+- While a session is still to do: again every 30 minutes (when Triathlon is not running). That way a session logged on the iPhone turns into the green tick.
+- About 20 seconds after it opened Triathlon hidden, and once the note is written, the app closes that same copy again, but only while it is still hidden and not in front. If the owner brought it to the front in those 20 seconds, it is left open (diary: "Triathlon is in front now; left open"). If it did not close yet, it is left alone (diary: "Triathlon did not close yet; left alone").
+- Nothing is opened while the screens sleep or the Mac sleeps; it waits until the Mac is awake.
 - Once all is done, or it is a rest day: the app leaves Triathlon alone.
-- Never while Triathlon's window is showing.
 - Nothing is done when Triathlon is not on the Mac.
-- "Refresh now" (the button in Settings, or the right click on the wave, the Peek) asks at once, and the waiting times do not count then, even with the switch off.
+- "Refresh now" (the button in Settings, or the right click on the wave, the Peek) asks at once: only the waiting times (20 and 30 minutes) are skipped, even with the switch off. It also does not open Triathlon while it runs or while the Mac sleeps.
 - With the switch off, the grey wave and the words "No note for today yet" stay until the owner opens Triathlon himself.
+- Settings lines under the switch: "Triathlon writes today’s note only when it opens. With this on, AMS Tria Menu opens Triathlon in the background, hidden and never in front, when there is no note for today, and again every 30 minutes while a session is still to do. It closes it again once the note is written." and "It never touches a Triathlon you opened yourself, and waits while the Mac sleeps. With this off, the wave stays grey until you open Triathlon yourself."
+- Consequence: while the owner has Triathlon open himself, a session logged on the iPhone shows as the green tick once Triathlon is in front again (Triathlon writes its note when it comes to the front).
+
+Why (27 Nov 2026): until 0.4, every 30 minutes the app politely closed a hidden, still-running Triathlon and opened it hidden again. The Mac puts a hidden Triathlon to sleep (for example with the lid closed); a sleeping Triathlon cannot answer the request to close. The request waited, and when the owner clicked Triathlon at 11:50 it woke up, carried out the waiting request first and closed at once, so Triathlon "did not respond".
 
 ## First start
 
@@ -71,7 +77,7 @@ Nothing to set up. On 26 Nov 2026 the installed app read Triathlon's note withou
 
 ## Settings window
 
-440 points wide. Three tabs: "Settings", "How it works", "What's new". At the bottom of every tab: "Version 0.4 (8)", "Quit AMS Tria Menu", and the full-colour "Done" button. Escape also closes the window.
+440 points wide. Three tabs: "Settings", "How it works", "What's new". At the bottom of every tab: "Version 0.4.1 (9)", "Quit AMS Tria Menu", and the full-colour "Done" button. Escape also closes the window.
 
 - Settings: "Open at login"; "Open Triathlon quietly" with two lines of explanation; the section "Where the figures come from" with two status lines (today's note: when Triathlon wrote it; Body Battery: from the Garmin Board, when the watch last synced).
 - How it works: a guide to the whole app, including the section "Signs in this app" (every mark and colour with its meaning). The text is in `App/Sources/Guide.swift`.
@@ -111,7 +117,7 @@ Nine small rule tests in `Core/Tests/TriaMenuCoreTests/RulesTests.swift` (all va
 - the words (session lengths, hover text, "watch synced" with and without the weekday);
 - Body Battery from the Board, from Triathlon, waiting for the first sync of the day, or none; yesterday from Triathlon or from the app's memory; times counted from 2001; the three-day memory;
 - the curve positions across the day;
-- the quiet opening rule with its numbers (20 minutes, 30 minutes, never while Triathlon's window shows);
+- the quiet opening rule with its numbers (20 minutes, 30 minutes, 20 seconds; never while Triathlon runs, never while the Mac sleeps, close only its own hidden copy);
 - the keeper's start order, the place repair and the one-copy rule.
 
 ## Not in the app
@@ -123,6 +129,7 @@ Nine small rule tests in `Core/Tests/TriaMenuCoreTests/RulesTests.swift` (all va
 
 ## Version history
 
+- 0.4.1 (9), 27 Nov 2026: bug fix. Before: every 30 minutes a hidden, still-running Triathlon was closed politely and opened hidden again; a sleeping hidden Triathlon kept the close request waiting and closed when the owner clicked it (27 Nov, 11:50). Now: the app opens Triathlon only when it is not running, never closes a running Triathlon (in front, behind or hidden), closes its own hidden copy about 20 seconds after opening once the note is written (left open if it came to the front; left alone if it did not close yet), and does not open Triathlon while the screens or the Mac sleep (before: it could try while half awake, and the try failed). Unchanged: open when there is no note, again every 30 minutes while a session is to do, wait 20 minutes after a try with no note, the switch, and Peek and "Refresh now" skipping only the waiting times (they also do not open Triathlon while it runs or the Mac sleeps). The two Settings lines under the switch are rewritten. New diary lines: "Today's note read; closing the hidden Triathlon again", "Triathlon is in front now; left open", "Triathlon did not close yet; left alone"; the line "Triathlon runs hidden; closing it and opening it hidden again for a fresh note" is gone. No new marks or colours, no change in look. The guide, What's new and this specification describe it.
 - 0.4 (8), 27 Nov 2026: the menu bar wave has two blocks and a thin line (stroke 1.5) in a paler green, `#8BE8C2` by night and `#35A882` by day (his pick, number 3 of four); three blocks, a bold line and `#00C97B` / `#00875A` before. The item is 18 points wide (28 before). A right click or control-click is now the Peek instead of the short menu: the wave rolls once (about 0.5 seconds), fresh numbers are asked for at once, and for 4 seconds words stand beside the wave ("Run 45 min · 62"; "Done", "Rest day" or "No note yet" in the other cases; a dash when Body Battery is not known). "Open Triathlon" is the panel's green button, Settings the panel's gear, "Refresh now" a button in Settings. The check notification `com.schabbauer.AMSTriaMenu.showRightMenu` is now `com.schabbauer.AMSTriaMenu.peek` (it does what a right click does). The app's own icon is unchanged. The guide, Signs in this app, What's new and the course describe it.
 - 0.3.4 (7), 26 Nov 2026: words only, no change in behaviour. The guide's First start said "Open at login" is on after install; it starts off. The guide's Settings paragraph now says the app is in the Mac's login list and the keeper restarts it, and names the "Refresh now" button. The guide and this specification both say the Board asks Garmin "more than a dozen questions" per answer (the guide said "a good dozen", this said "about 17"). This specification no longer says the Mac's login list is unused, gives the night green as `#00C97B` (was `#01C97B`), and carries the right version in its title and in the Settings line (both said 0.1).
 
@@ -140,4 +147,4 @@ Nine small rule tests in `Core/Tests/TriaMenuCoreTests/RulesTests.swift` (all va
 - `--refresh`: tells the running copy to do "Refresh now".
 - `--open-at-login on|off|status`. (`--right-menu-items` was removed in 0.4 with the menu.)
 - Notifications the running copy listens to: `com.schabbauer.AMSTriaMenu.togglePanel`, `.openSettings` (object: a tab's title, or "end"), `.peek` (does what a right click does; `.showRightMenu` before 0.4), `.refresh`, `.openFirstSession`.
-- A short diary of what the app did is kept in `~/Library/Logs/AMS Tria Menu/diary.log` (times and steps, no training or health figures).
+- A short diary of what the app did is kept in `~/Library/Logs/AMS Tria Menu/diary.log` (times and steps, no training or health figures). Since 0.4.1 it also has: "Today's note read; closing the hidden Triathlon again", "Triathlon is in front now; left open", "Triathlon did not close yet; left alone" (the line "Triathlon runs hidden; closing it and opening it hidden again for a fresh note" no longer occurs).

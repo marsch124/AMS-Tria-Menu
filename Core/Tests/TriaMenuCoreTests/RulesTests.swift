@@ -144,22 +144,40 @@ final class RulesTests: XCTestCase {
     }
 
     func testOpeningTriathlonQuietly() {
-        func step(on: Bool = true, installed: Bool = true, today: Bool, toDo: Bool = false, running: Bool = false, showing: Bool = false,
+        func step(on: Bool = true, installed: Bool = true, today: Bool, toDo: Bool = false, running: Bool = false, awake: Bool = true,
                   since: Double? = nil, asked: Bool = false) -> QuietOpen.Step {
-            QuietOpen.step(on: on, installed: installed, noteIsToday: today, hasToDo: toDo, running: running, showing: showing,
+            QuietOpen.step(on: on, installed: installed, noteIsToday: today, hasToDo: toDo, running: running, macAwake: awake,
                            sinceLastTry: since, asked: asked)
         }
         XCTAssertEqual(step(today: false), .open, "morning: no note for today, Triathlon closed")
-        XCTAssertEqual(step(today: false, running: true), .restart, "left running hidden overnight")
-        XCTAssertEqual(step(today: false, running: true, showing: true), .nothing, "never while its window is showing")
         XCTAssertEqual(step(today: false, since: 60), .nothing, "a try a minute ago: wait")
         XCTAssertEqual(step(today: false, since: 21 * 60), .open)
-        XCTAssertEqual(step(today: true, toDo: true, running: true, since: 10 * 60), .nothing)
-        XCTAssertEqual(step(today: true, toDo: true, running: true, since: 31 * 60), .restart, "a session to do: look again each half hour")
+        XCTAssertEqual(step(today: true, toDo: true, since: 10 * 60), .nothing)
+        XCTAssertEqual(step(today: true, toDo: true, since: 31 * 60), .open, "a session to do: look again each half hour")
         XCTAssertEqual(step(today: true, toDo: false, since: 5 * 3600), .nothing, "all done: left in peace")
         XCTAssertEqual(step(on: false, today: false), .nothing, "switched off")
         XCTAssertEqual(step(on: false, today: true, since: 5, asked: true), .open, "Refresh now works even when switched off")
         XCTAssertEqual(step(installed: false, today: false, asked: true), .nothing)
+    }
+
+    /// 0.4.1 (27 Nov 2026): a running Triathlon may be asleep; a quit sent to it waited and closed it when he
+    /// clicked it later. So a running copy is never touched, nothing opens while the Mac sleeps, and only the
+    /// hidden copy this app opened is closed again.
+    func testQuietOpeningLeavesARunningTriathlonAlone() {
+        func step(running: Bool = false, awake: Bool = true, asked: Bool = false) -> QuietOpen.Step {
+            QuietOpen.step(on: true, installed: true, noteIsToday: true, hasToDo: true, running: running, macAwake: awake,
+                           sinceLastTry: 31 * 60, asked: asked)
+        }
+        XCTAssertEqual(step(running: true), .nothing, "his own or a sleeping copy: never closed and reopened")
+        XCTAssertEqual(step(running: true, asked: true), .nothing, "not even at Refresh now or a right click")
+        XCTAssertEqual(step(awake: false), .nothing, "lid closed or a dark wake: wait")
+        XCTAssertEqual(step(awake: false, asked: true), .nothing)
+        XCTAssertEqual(QuietOpen.closeAfter, 20)
+        XCTAssertTrue(QuietOpen.closeOwnCopy(stillRunning: true, hidden: true, active: false, openedByHimSince: false), "its own hidden copy")
+        XCTAssertFalse(QuietOpen.closeOwnCopy(stillRunning: true, hidden: false, active: false, openedByHimSince: false), "brought forward")
+        XCTAssertFalse(QuietOpen.closeOwnCopy(stillRunning: true, hidden: true, active: true, openedByHimSince: false), "in front")
+        XCTAssertFalse(QuietOpen.closeOwnCopy(stillRunning: true, hidden: true, active: false, openedByHimSince: true), "he opened it")
+        XCTAssertFalse(QuietOpen.closeOwnCopy(stillRunning: false, hidden: true, active: false, openedByHimSince: false), "already gone")
     }
 
     func testKeeperAndPlace() {

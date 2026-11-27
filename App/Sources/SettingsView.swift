@@ -179,8 +179,8 @@ struct SettingsView: View {
                 Toggle("Open Triathlon quietly", isOn: $model.quietOn)
                     .tint(Palette.mainFill)
                     .accessibilityIdentifier("quietToggle")
-                small("Triathlon writes today\u{2019}s note only when it opens. With this on, AMS Tria Menu opens Triathlon in the background, hidden and never in front, when there is no note for today, and again every \(Int(QuietOpen.refresh / 60)) minutes while a session is still to do.")
-                small("It never touches Triathlon while its window is showing. With this off, the wave stays grey until you open Triathlon yourself.")
+                small("Triathlon writes today\u{2019}s note only when it opens. With this on, AMS Tria Menu opens Triathlon in the background, hidden and never in front, when there is no note for today, and again every \(Int(QuietOpen.refresh / 60)) minutes while a session is still to do. It closes it again once the note is written.")
+                small("It never touches a Triathlon you opened yourself, and waits while the Mac sleeps. With this off, the wave stays grey until you open Triathlon yourself.")
             }
 
             VStack(alignment: .leading, spacing: 6) {
