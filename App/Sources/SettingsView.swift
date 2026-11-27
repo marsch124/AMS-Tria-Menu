@@ -251,8 +251,8 @@ struct SettingsView: View {
     @ViewBuilder private func swatch(_ kind: SignKind) -> some View {
         let box = RoundedRectangle(cornerRadius: 5, style: .continuous)
         switch kind {
-        case .waveGreen: MarkView(mark: .wave, size: 20, stroke: 2.3).foregroundStyle(Palette.today(scheme))
-        case .waveGrey: MarkView(mark: .wave, size: 20, stroke: 2.3).foregroundStyle(Color.secondary)
+        case .waveGreen: MenuWaveView().foregroundStyle(Palette.wave(scheme))
+        case .waveGrey: MenuWaveView().foregroundStyle(Color.secondary)
         case .markSport: MarkView(mark: .sport("run"), size: 18).foregroundStyle(Sport.ink("run", scheme))
         case .markMoon: MarkView(mark: .moon, size: 18).foregroundStyle(Sport.ink("rest", scheme))
         case .pillToDo:

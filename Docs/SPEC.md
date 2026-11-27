@@ -1,4 +1,4 @@
-# AMS Tria Menu 0.3.4 (build 7, 26 Nov 2026) - Specification
+# AMS Tria Menu 0.4 (build 8, 27 Nov 2026) - Specification
 
 ## Purpose
 
@@ -8,11 +8,16 @@ AMS Triathlon Training runs on the Mac as an iPad app, and an iPad app cannot pu
 
 Since 0.3 the item is ONE icon and nothing beside it (his own wish, with a picture of AMS Triathlon Training's app icon: "make it like this").
 
-- The icon is the training wave: the line with three blocks of AMS Triathlon Training's app icon (`tools/app-icon.svg` there), redrawn on the 24-point grid as the app mark `trainingWave` ("Training wave") in the central icon library (AMS-Icons). In the menu bar it is drawn 20 points wide with a stroke of 2.3, round ends and joins.
-- Green (day `#00875A`, night `#00C97B`) while the app has a note that counts today; grey while it has none. It does not change with the session, and it is redrawn only when it turns from green to grey or back.
+- The icon is the training wave, redrawn on the 24-point grid. Since 0.4 the menu bar wave has TWO blocks and a thin line (3 blocks and a bold line in 0.3 to 0.3.4; the path of the two-block wave is `M5.92 16.05 7.31 7.95h2.54l1.39 8.1h1.52l1.39-8.1h2.54l1.39 8.1`, stroke 1.5, round ends and joins). The item is 18 points wide (28 points in 0.3 to 0.3.4). His pick, number 3 of four options in one picture.
+- The app's own icon (the tile in Finder, the panel header and Settings: white wave on green, three blocks) did not change in 0.4. The library mark `trainingWave` ("Training wave", AMS-Icons) still has the three blocks of AMS Triathlon Training's app icon.
+- Pale green (day `#35A882`, night `#8BE8C2`; day `#00875A` and night `#00C97B` in 0.3 to 0.3.4) while the app has a note that counts today; grey while it has none. It does not change with the session, and it is redrawn only when it turns from green to grey or back.
 - No number: Body Battery is in the panel and in the hover words.
 - Resting the pointer on it says the sessions and Body Battery in words, for example "Run 45 min, to do · Swim 40 min, done" and under it "Body Battery 62".
-- A click opens the panel. A right click or control-click shows the short menu: "Open Triathlon", "Refresh now", "Settings…".
+- A click opens the panel.
+- A right click or control-click is the "Peek" (since 0.4; before, it showed a short menu "Open Triathlon", "Refresh now", "Settings…"). There is no menu any more. At the right click: (1) the wave rolls once, a small ripple that runs through it, about 0.5 seconds; (2) the app asks for fresh numbers at once, exactly what "Refresh now" does (the waiting times do not count, even with "Open Triathlon quietly" off); (3) for 4 seconds, words stand beside the wave in the menu bar: the first session still to do today and the Body Battery number, for example "Run 45 min · 62" (invented). After 4 seconds the words fold away and the wave stands alone again (the item is 18 points wide again).
+- The words before the dot: a session still to do, the first one: that session ("Run 45 min"); nothing left to do and at least one done: "Done"; a rest day or nothing planned: "Rest day"; no note for today: "No note yet". After the dot (a middle dot with a space on each side) the Body Battery number, or a dash ("–") when it is not known.
+- A second right click while the words show starts the 4 seconds again.
+- Nothing was lost: "Open Triathlon" is the green button in the panel, Settings is the gear in the panel, and "Refresh now" is still a button in Settings (the right click refreshes too).
 - In 0.1 and 0.2 the item was a mark with four faces (the sport's mark in its colour while a session was to do, a green tick when done, a moon on a rest day, a grey mark without a note) and the Body Battery number, or a dash, beside it.
 
 ## Panel
@@ -57,7 +62,7 @@ Triathlon writes today's note only when it opens. A switch in Settings, "Open Tr
 - Once all is done, or it is a rest day: the app leaves Triathlon alone.
 - Never while Triathlon's window is showing.
 - Nothing is done when Triathlon is not on the Mac.
-- "Refresh now" (right-click menu) asks at once, and the waiting times do not count then, even with the switch off.
+- "Refresh now" (the button in Settings, or the right click on the wave, the Peek) asks at once, and the waiting times do not count then, even with the switch off.
 - With the switch off, the grey wave and the words "No note for today yet" stay until the owner opens Triathlon himself.
 
 ## First start
@@ -66,7 +71,7 @@ Nothing to set up. On 26 Nov 2026 the installed app read Triathlon's note withou
 
 ## Settings window
 
-440 points wide. Three tabs: "Settings", "How it works", "What's new". At the bottom of every tab: "Version 0.3.4 (7)", "Quit AMS Tria Menu", and the full-colour "Done" button. Escape also closes the window.
+440 points wide. Three tabs: "Settings", "How it works", "What's new". At the bottom of every tab: "Version 0.4 (8)", "Quit AMS Tria Menu", and the full-colour "Done" button. Escape also closes the window.
 
 - Settings: "Open at login"; "Open Triathlon quietly" with two lines of explanation; the section "Where the figures come from" with two status lines (today's note: when Triathlon wrote it; Body Battery: from the Garmin Board, when the watch last synced).
 - How it works: a guide to the whole app, including the section "Signs in this app" (every mark and colour with its meaning). The text is in `App/Sources/Guide.swift`.
@@ -87,7 +92,8 @@ Each colour or mark means one thing:
 
 - Green heading: today. Blue heading: tomorrow. Purple heading and slim purple bar: this week.
 - Pink: Body Battery. White line with a dot: today so far. Thin dark plum line: yesterday.
-- Green wave in the menu bar: the app has today's note. Grey wave: no note for today yet.
+- Pale green wave in the menu bar: the app has today's note. Grey wave: no note for today yet.
+- Words beside the wave for 4 seconds: you right-clicked (the Peek); the next session and Body Battery, for example "Run 45 min · 62"; they fold away by themselves.
 - A sport's colour (in the panel's rows): that sport.
 - Green tick: done. Nothing else is ever a tick.
 - Grey: nothing to do or nothing known. Never red.
@@ -117,6 +123,7 @@ Nine small rule tests in `Core/Tests/TriaMenuCoreTests/RulesTests.swift` (all va
 
 ## Version history
 
+- 0.4 (8), 27 Nov 2026: the menu bar wave has two blocks and a thin line (stroke 1.5) in a paler green, `#8BE8C2` by night and `#35A882` by day (his pick, number 3 of four); three blocks, a bold line and `#00C97B` / `#00875A` before. The item is 18 points wide (28 before). A right click or control-click is now the Peek instead of the short menu: the wave rolls once (about 0.5 seconds), fresh numbers are asked for at once, and for 4 seconds words stand beside the wave ("Run 45 min · 62"; "Done", "Rest day" or "No note yet" in the other cases; a dash when Body Battery is not known). "Open Triathlon" is the panel's green button, Settings the panel's gear, "Refresh now" a button in Settings. The check notification `com.schabbauer.AMSTriaMenu.showRightMenu` is now `com.schabbauer.AMSTriaMenu.peek` (it does what a right click does). The app's own icon is unchanged. The guide, Signs in this app, What's new and the course describe it.
 - 0.3.4 (7), 26 Nov 2026: words only, no change in behaviour. The guide's First start said "Open at login" is on after install; it starts off. The guide's Settings paragraph now says the app is in the Mac's login list and the keeper restarts it, and names the "Refresh now" button. The guide and this specification both say the Board asks Garmin "more than a dozen questions" per answer (the guide said "a good dozen", this said "about 17"). This specification no longer says the Mac's login list is unused, gives the night green as `#00C97B` (was `#01C97B`), and carries the right version in its title and in the Settings line (both said 0.1).
 
 - 0.3.3 (6), 26 Nov 2026: the Body Battery card is a bit paler pink still, `#F06AAB` by day and `#E35A9D` by night (his ask; `#EC4899` / `#E0408C` in 0.3.2). So the white words stay easy to read, the small words at the right of the card are semibold (medium before) and the hour figures 06 / 12 / 18 are medium weight (regular before). Nothing else changed.
@@ -131,6 +138,6 @@ Nine small rule tests in `Core/Tests/TriaMenuCoreTests/RulesTests.swift` (all va
 - `--snapshots <folder>`: pictures of every screen with invented values, by day and by night.
 - `--read`: prints what the app reads right now (green or grey wave, Body Battery, the note's day and states, the Body Battery source). Opens nothing.
 - `--refresh`: tells the running copy to do "Refresh now".
-- `--open-at-login on|off|status`, `--right-menu-items`.
-- Notifications the running copy listens to: `com.schabbauer.AMSTriaMenu.togglePanel`, `.openSettings` (object: a tab's title, or "end"), `.showRightMenu`, `.refresh`, `.openFirstSession`.
+- `--open-at-login on|off|status`. (`--right-menu-items` was removed in 0.4 with the menu.)
+- Notifications the running copy listens to: `com.schabbauer.AMSTriaMenu.togglePanel`, `.openSettings` (object: a tab's title, or "end"), `.peek` (does what a right click does; `.showRightMenu` before 0.4), `.refresh`, `.openFirstSession`.
 - A short diary of what the app did is kept in `~/Library/Logs/AMS Tria Menu/diary.log` (times and steps, no training or health figures).

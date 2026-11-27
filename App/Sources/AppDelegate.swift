@@ -34,12 +34,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             NSApp.terminate(nil)
             return
         }
-        // For checks: prints the titles of the right-click menu, then quits.
-        if arguments.contains("--right-menu-items") {
-            print(StatusItemController.rightMenuTitles.joined(separator: "\n"))
-            NSApp.terminate(nil)
-            return
-        }
         // For checks: prints what the app reads right now (the note, the Board), then quits. Opens nothing.
         if arguments.contains("--read") {
             UserDefaults.standard.register(defaults: [:])
@@ -104,8 +98,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let center = DistributedNotificationCenter.default()
         center.addObserver(self, selector: #selector(showSettings),
                            name: Notification.Name("com.schabbauer.AMSTriaMenu.openSettings"), object: nil)
-        center.addObserver(self, selector: #selector(showRightMenu),
-                           name: Notification.Name("com.schabbauer.AMSTriaMenu.showRightMenu"), object: nil)
+        // For checks: the same as a right-click on the wave.
+        center.addObserver(self, selector: #selector(peek),
+                           name: Notification.Name("com.schabbauer.AMSTriaMenu.peek"), object: nil)
         center.addObserver(self, selector: #selector(refresh), name: Self.refreshName, object: nil)
         // For checks: the same as a click on the first session row in the panel.
         center.addObserver(self, selector: #selector(openFirst),
@@ -116,7 +111,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let word = notification.object as? String ?? ""
         openSettings(tab: SettingsView.Tab(rawValue: word) ?? .settings, atEnd: word == "end")
     }
-    @objc private func showRightMenu() { status?.showMenuForCheck() }
+    @objc private func peek() { status?.peek() }
     @objc private func refresh() { model?.refreshNow() }
     @objc private func openFirst() { model?.openTriathlon(model?.note?.sessions.first) }
 
@@ -174,6 +169,9 @@ enum Snapshots {
             save(HStack(spacing: 18) {
                 Image(nsImage: settled(StatusItemController.image(known: true), dark: dark))
                 Image(nsImage: settled(StatusItemController.image(known: false), dark: dark))
+                Image(nsImage: settled(StatusItemController.image(known: true, roll: 0.45), dark: dark))
+                Image(nsImage: settled(StatusItemController.image(known: true, peek: ("Run 45 min", "62")), dark: dark))
+                Image(nsImage: settled(StatusItemController.image(known: true, peek: ("Rest day", "\u{2013}")), dark: dark))
             }
             .padding(.horizontal, 12).padding(.vertical, 4)
             .background(dark ? Color(white: 0.2) : Color(white: 0.88)), folder.appendingPathComponent("menubar-\(tag).png"))

@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
 <style>
 /* Layout: chapter rail on the left, coach + a pretend Mac on the right. Reusable tour engine: LESSONS + a small simulator.
-   Based on the AMS Fan Menu tour engine. Written for AMS Tria Menu 0.3.3. Update this tour in the release that changes a taught screen.
+   Based on the AMS Fan Menu tour engine. Written for AMS Tria Menu 0.4. Update this tour in the release that changes a taught screen.
    Every pretend-screen class starts with tm- so it can never clash with the engine's own classes. */
 :root {
   --bg: #F3F6FA; --panel: #FFFFFF; --fg: #17212B; --muted: #5F6C7A; --line: #DCE3EB;
@@ -85,14 +85,14 @@ svg.g { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: rou
 .stage button { font-family: inherit }
 /* AMS Tria Menu's pretend screen. Colours are the app's own (Icons.swift, Palette). Every class starts with tm-. */
 :root {
-  --t-green:#00875A; --t-greenf:#00875A; --t-blue:#1266C8; --t-purple:#7C3AED; --t-purplef:#7C3AED; --t-pink:#F06AAB; --t-plum:#4E0A2C; --t-pale:.14;
+  --t-green:#00875A; --t-wave:#35A882; --t-greenf:#00875A; --t-blue:#1266C8; --t-purple:#7C3AED; --t-purplef:#7C3AED; --t-pink:#F06AAB; --t-plum:#4E0A2C; --t-pale:.14;
   --i-swim:#2B4A88; --i-bike:#8C7605; --i-run:#49713B; --i-strength:#8C4D0E; --i-rest:#37404C; --i-rowing:#07514A; --i-mobility:#47298B; --i-race:#8D2929; --pilltx:#fff; --miss:#6F6F74;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --t-green:#00C97B; --t-blue:#3B9EFF; --t-purple:#C084FC; --t-purplef:#9A5CF0; --t-pink:#E35A9D; --t-plum:#45082A; --t-pale:.22;
+  --t-green:#00C97B; --t-wave:#8BE8C2; --t-blue:#3B9EFF; --t-purple:#C084FC; --t-purplef:#9A5CF0; --t-pink:#E35A9D; --t-plum:#45082A; --t-pale:.22;
   --i-swim:#4F87F8; --i-bike:#FFD60A; --i-run:#85CE6C; --i-strength:#FF8C1A; --i-rest:#A3B1C2; --i-rowing:#0D9488; --i-mobility:#8650FE; --i-race:#EF4444; --pilltx:rgba(0,0,0,.85); --miss:#A5A5AD; } }
 :root[data-theme="dark"] {
-  --t-green:#00C97B; --t-blue:#3B9EFF; --t-purple:#C084FC; --t-purplef:#9A5CF0; --t-pink:#E35A9D; --t-plum:#45082A; --t-pale:.22;
+  --t-green:#00C97B; --t-wave:#8BE8C2; --t-blue:#3B9EFF; --t-purple:#C084FC; --t-purplef:#9A5CF0; --t-pink:#E35A9D; --t-plum:#45082A; --t-pale:.22;
   --i-swim:#4F87F8; --i-bike:#FFD60A; --i-run:#85CE6C; --i-strength:#FF8C1A; --i-rest:#A3B1C2; --i-rowing:#0D9488; --i-mobility:#8650FE; --i-race:#EF4444; --pilltx:rgba(0,0,0,.85); --miss:#A5A5AD; }
 
 .tm-sp { flex: 1 }
@@ -136,9 +136,9 @@ svg.g { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: rou
 .tm-main { border: 0; border-radius: 9px; height: 28px; background: #00875A; color: #fff; font: 600 12.5px var(--f-mac); cursor: pointer; width: 100% }
 .tm-main:hover { opacity: .9 }
 
-.tm-ctx { position: absolute; right: 118px; top: 28px; width: 160px; background: var(--win); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); padding: 4px; z-index: 36 }
-.tm-ctx button { display: flex; width: 100%; border: 0; background: none; color: var(--win-fg); font: inherit; padding: 3px 8px; border-radius: 5px; text-align: left; cursor: pointer }
-.tm-ctx button:hover { background: #00875A; color: #fff }
+.tm-peek { display: inline-block; margin-left: 6px; font-size: 13px; font-weight: 500; white-space: nowrap; color: var(--menubar-fg); font-variant-numeric: tabular-nums }
+@keyframes tm-roll { 0% { transform: translateX(0) } 25% { transform: translateX(-3px) } 60% { transform: translateX(2px) } 100% { transform: translateX(0) } }
+.tm-item.roll svg { animation: tm-roll .5s ease-in-out }
 .tm-practice { position: absolute; left: 12px; bottom: 12px; width: 260px; background: var(--win); border: 1px dashed var(--win-muted); border-radius: 11px; padding: 8px; z-index: 12; display: flex; flex-direction: column; gap: 4px }
 .tm-practice small { color: var(--win-muted); font-size: 11px; line-height: 1.3; margin-bottom: 2px }
 .tm-practice button { font: inherit; padding: 4px 8px; border-radius: 7px; border: 1px solid var(--line); background: var(--win-bar); color: var(--win-fg); cursor: pointer; text-align: left }
@@ -214,6 +214,7 @@ svg.g { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: rou
 <script>
 /* ---------- Icons: the wave and the sport marks are the app's own drawings (AMS-Icons, 24-pt grid, 1.9 stroke, round ends, no fill);
    the rest are generic line icons in the same style. ---------- */
+const WAVE2 = '<path d="M5.92 16.05 7.31 7.95h2.54l1.39 8.1h1.52l1.39-8.1h2.54l1.39 8.1"/>';
 const WAVE = '<path d="M2.5 16.05 3.89 7.95h2.54l1.39 8.1h1.52l1.39-8.1h2.54l1.39 8.1h1.52l1.39-8.1h2.54l1.39 8.1"/>';
 const MARK = {
   swim: 'M2.6 17.4c1.6-1.3 3-1.3 4.6 0 1.6 1.3 3 1.3 4.6 0 1.6-1.3 3-1.3 4.6 0 1.5 1.3 3 1.3 4.5 0 M2.6 21c1.6-1.3 3-1.3 4.6 0 1.6 1.3 3 1.3 4.6 0 1.6-1.3 3-1.3 4.6 0 1.5 1.3 3 1.3 4.5 0 M7.4 13.6c1.9-1.7 3.9-3.3 6.1-4.7 M10.9 11.1c1.6.4 3.1 1 4.6 1.8 M16.8 6.4c.05-1.05.85-1.85 1.9-1.85 1.05 0 1.85.8 1.85 1.85 0 1.1-.8 1.9-1.85 1.85-1.05-.05-1.9-.85-1.9-1.85Z',
@@ -248,7 +249,7 @@ const REST = { key: 'rest', sport: 'rest', word: 'Rest day', len: '', title: '',
 const BODY_TODAY = [[0, .3], [.12, .55], [.28, .78], [.45, .6], [.62, .44]];
 const BODY_YEST = [[0, .34], [.1, .52], [.27, .88], [.5, .62], [.7, .4], [.9, .2], [1, .3]];
 const START = () => ({
-  panel: false, settings: false, spage: 'settings', menu: false,
+  panel: false, settings: false, spage: 'settings', peek: '', roll: false,
   note: true, sessions: [{ ...SWIM }, { ...RUN }], tomorrow: 'Bike, 1 h 10 min', week: '40 min done of 3 h 35 min planned', weekShare: 40 / 215,
   src: 'board', quiet: true, login: false, busy: false, practice: [], toast: '',
 });
@@ -303,13 +304,13 @@ function panelHTML() {
   const wk = S.note ? `<div class="tm-blk" style="gap:2px" data-t="week"><div class="tm-hd" style="color:var(--t-purple)">This week</div><div class="tm-line">${esc(S.week)}</div><div class="tm-weekbar"><i style="width:${Math.max(S.weekShare * 100, 2)}%"></i></div></div>` : '';
   const num = battery() == null ? '–' : battery();
   const card = `<div class="tm-card" data-t="bcard"><div class="tm-ctop"><span class="tm-cap">Body Battery</span><span class="tm-bnum">${num}</span><span class="tm-sp"></span><span class="tm-small">${smallWords()}</span></div>${curveSVG()}</div>`;
-  return `<div class="tm-panel" data-t="panel"><div class="tm-ph" data-t="head">${tile(22)}<b>AMS Tria Menu</b><span>0.3.3</span><span class="tm-sp"></span><button class="tm-gear" data-act="gear" data-t="gear" aria-label="Settings" title="Settings"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${GEAR}</svg></button></div>
+  return `<div class="tm-panel" data-t="panel"><div class="tm-ph" data-t="head">${tile(22)}<b>AMS Tria Menu</b><span>0.4</span><span class="tm-sp"></span><button class="tm-gear" data-act="gear" data-t="gear" aria-label="Settings" title="Settings"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${GEAR}</svg></button></div>
     <div class="tm-blk">${today}</div>${tom}${wk}${card}<button class="tm-main" data-act="open-tri" data-t="openbtn">Open Triathlon</button></div>`;
 }
 
 /* ---- Practice box ---- */
 const PRACTICE = {
-  rclick: () => 'Right-click for me',
+  rclick: () => 'Right-click for me (the Peek)',
   write: () => 'Triathlon writes today’s note',
   log: () => 'Log the Run on the iPhone',
   noboard: () => 'The Garmin Board stops answering',
@@ -318,7 +319,8 @@ const PRACTICE = {
 
 /* ---- Settings window ---- */
 const SIGNS = [
-  ['wave-g', 'Green wave in the menu bar', 'The app has today’s note from Triathlon. Click it for today’s sessions and Body Battery.'],
+  ['wave-g', 'Pale green wave in the menu bar', 'The app has today’s note from Triathlon. Click it for today’s sessions and Body Battery.'],
+  ['peek', 'Words beside the wave for 4 seconds', 'You right-clicked. The next session and your Body Battery, for example “Run 45 min · 62”. They fold away by themselves.'],
   ['wave-x', 'Grey wave in the menu bar', 'No note for today yet.'],
   ['mark', 'A sport’s mark in its colour', 'In a row of the panel: the sport of that session. Swim blue, bike yellow, run green, strength orange, rowing teal, mobility purple, race red. Grey when the session was missed.'],
   ['moon', 'Moon', 'In a row of the panel: a rest day.'],
@@ -333,8 +335,9 @@ const SIGNS = [
   ['btn', 'A button in full colour', 'The main thing to do on that screen.'],
 ];
 const swatch = k => ({
-  'wave-g': `<svg viewBox="0 0 24 24" style="color:var(--t-green);width:22px;height:22px;stroke-width:2.3">${WAVE}</svg>`,
-  'wave-x': `<svg viewBox="0 0 24 24" style="color:var(--win-muted);width:22px;height:22px;stroke-width:2.3">${WAVE}</svg>`,
+  'wave-g': `<svg viewBox="0 0 24 24" style="color:var(--t-wave);width:22px;height:22px;stroke-width:1.5">${WAVE2}</svg>`,
+  'peek': `<svg viewBox="0 0 24 24" style="color:var(--t-wave);width:22px;height:22px;stroke-width:1.5">${WAVE2}</svg>`,
+  'wave-x': `<svg viewBox="0 0 24 24" style="color:var(--win-muted);width:22px;height:22px;stroke-width:1.5">${WAVE2}</svg>`,
   mark: `<svg viewBox="0 0 24 24" style="color:var(--i-run)"><path d="${MARK.run}"/></svg>`,
   moon: `<svg viewBox="0 0 24 24" style="color:var(--i-rest)"><path d="${MARK.rest}"/></svg>`,
   pill: `<span class="tm-pill" style="--ink:var(--i-run)">to do</span>`,
@@ -349,7 +352,7 @@ const swatch = k => ({
 })[k];
 const GUIDE = [
   ['What this app is for', 'AMS Triathlon Training runs on the Mac as an iPad app, and an iPad app cannot put anything in the menu bar.'],
-  ['The menu bar', 'You see one small icon and nothing beside it: the training wave.'],
+  ['The menu bar', 'You see one small icon and nothing beside it: the training wave, a thin line with two blocks, pale green with today’s note. A right-click is the Peek: for 4 seconds, words stand beside the wave, the next session and Body Battery.'],
   ['The panel', 'At the top are the small app tile (the white training wave on green), the name, the version and the gear button for Settings.'],
   ['Today\'s sessions', 'The green heading says the day, for example “Today · Tue 1 Dec”. Under it is one row for each session.'],
   ['Tomorrow and this week', '“Tomorrow” has a blue heading. It names tomorrow’s first session, for example “Bike, 1 h 10 min”, or “Rest day”.'],
@@ -362,6 +365,7 @@ const GUIDE = [
   ['Good to know: the limits', 'The app only knows what AMS Triathlon Training has written down and what the Garmin Board says.'],
 ];
 const NEWS = [
+  ['0.4', 'The wave in the menu bar is smaller and paler. Before: three blocks, a bold line and a strong green, 28 points wide. Now: two blocks, a thin line and a pale green, 18 points wide. A right-click on the wave is now the Peek. Before: a short menu. Now: the wave rolls once, fresh numbers are asked for at once, and for 4 seconds words stand beside the wave, for example “Run 45 min · 62”. “Open Triathlon” is the panel’s green button, Settings is the gear, and “Refresh now” is a button in Settings.'],
   ['0.3.3', 'The Body Battery card in the panel is a bit paler pink, as you asked. Before (0.3.2): a bright pink. Now: a paler pink, a little softer at night. The words on it are still white.'],
   ['0.3.2', 'The Body Battery card in the panel is a lighter, brighter pink, as you asked. Before: a deep raspberry. Now: a bright pink, a little softer at night. The words on it are still white.'],
   ['0.3.1', 'The app’s own icon is the wave now too: the white training wave on calm green. Before: a white medal on green.'],
@@ -384,28 +388,41 @@ function settingsPage() {
 }
 function settingsHTML() {
   return `<div class="tm-win tm-set" data-t="settings"><div class="tm-tb"><span class="tm-dots"><i data-act="close-settings"></i><i></i><i></i></span><span class="tm-ttl">AMS Tria Menu</span></div>
-    <div class="tm-sh">${tile(26)}<b>AMS Tria Menu</b><span>0.3.3</span></div>
+    <div class="tm-sh">${tile(26)}<b>AMS Tria Menu</b><span>0.4</span></div>
     <div class="tm-tabs">${[['settings', 'Settings'], ['guide', 'How it works'], ['news', 'What’s new']].map(([k, l]) => `<button class="t-${k} ${S.spage === k ? 'on' : ''}" data-act="spage" data-p="${k}" data-t="tab-${k}">${l}</button>`).join('')}</div>
     <div class="tm-pane">${settingsPage()}</div>
-    <div class="tm-sfoot">Version 0.3.3 (6)<span class="tm-sp"></span><button class="tm-mbtn" data-act="none">Quit AMS Tria Menu</button><button class="tm-mbtn prim" data-act="close-settings" data-t="done">Done</button></div></div>`;
+    <div class="tm-sfoot">Version 0.4 (8)<span class="tm-sp"></span><button class="tm-mbtn" data-act="none">Quit AMS Tria Menu</button><button class="tm-mbtn prim" data-act="close-settings" data-t="done">Done</button></div></div>`;
 }
 
 function renderStage() {
   const st = document.getElementById('stage'), oldPane = st.querySelector('.tm-pane'), keep = oldPane ? oldPane.scrollTop : 0;
   const bar = `<div class="tm-mbar"><b>Finder</b><span>File</span><span>Edit</span><span>View</span><span>Go</span><span class="tm-sp"></span>
-      <button class="tm-item ${S.panel || S.menu ? 'open' : ''}" data-act="item" data-t="item" aria-label="AMS Tria Menu, ${S.note ? 'green wave, today’s note is there' : 'grey wave, no note for today yet'}" style="color:${S.note ? 'var(--t-green)' : 'var(--win-muted)'}">${glyph(20, 2.3, WAVE)}<span class="tm-tip">${esc(hoverWords()).replace('\n', '<br>')}</span></button>
+      <button class="tm-item ${S.panel ? 'open' : ''} ${S.roll ? 'roll' : ''}" data-act="item" data-t="item" aria-label="AMS Tria Menu, ${S.note ? 'pale green wave, today’s note is there' : 'grey wave, no note for today yet'}" style="color:${S.note ? 'var(--t-wave)' : 'var(--win-muted)'}">${glyph(18, 1.5, WAVE2)}${S.peek ? `<span class="tm-peek" data-t="peek">${esc(S.peek)}</span>` : ''}<span class="tm-tip">${esc(hoverWords()).replace('\n', '<br>')}</span></button>
       <span>Tue 1 Dec&nbsp; 15:05</span></div>`;
-  const menu = S.menu ? `<div class="tm-ctx" data-t="menu" role="menu"><button data-act="m-open" data-t="m-open">Open Triathlon</button><button data-act="m-refresh" data-t="m-refresh">Refresh now</button><button data-act="m-settings" data-t="m-settings">Settings…</button></div>` : '';
   const practice = S.practice.length ? `<div class="tm-practice" data-t="practice"><small>Practice box. It is not in the real app. It stands in for things that happen on your Mac.</small>${S.practice.map(k => `<button data-act="p-${k}" data-t="p-${k}">${PRACTICE[k]()}</button>`).join('')}</div>` : '';
-  st.innerHTML = `${bar}${S.panel ? panelHTML() : ''}${menu}${practice}${S.settings ? settingsHTML() : ''}${S.toast ? `<div class="tm-toast">${esc(S.toast)}</div>` : ''}`;
+  st.innerHTML = `${bar}${S.panel ? panelHTML() : ''}${practice}${S.settings ? settingsHTML() : ''}${S.toast ? `<div class="tm-toast">${esc(S.toast)}</div>` : ''}`;
   const np = st.querySelector('.tm-pane'); if (np) np.scrollTop = keep;
   markTarget();
 }
 function toast(t) { S.toast = t; renderStage(); clearTimeout(toast.h); toast.h = setTimeout(() => { S.toast = ''; renderStage(); }, 2600); }
-function openMenu() { set({ panel: false, menu: !S.menu }); renderStage(); if (S.menu) emit('menu-open'); }
+function peekWords() {
+  const num = battery() == null ? '–' : battery();
+  let w;
+  if (!S.note) w = 'No note yet';
+  else { const todo = S.sessions.find(x => x.state === 'todo'); const some = S.sessions.some(x => x.state === 'done');
+    w = todo ? `${todo.word} ${todo.len}` : some ? 'Done' : 'Rest day'; }
+  return `${w} · ${num}`;
+}
+/* The Peek: the wave rolls once, fresh numbers are asked for, words stand beside the wave for 4 seconds. */
+function peek() {
+  clearTimeout(peek.h); clearTimeout(peek.r);
+  set({ panel: false, roll: true, peek: peekWords() }); renderStage(); emit('peek');
+  peek.r = later(() => { S.roll = false; renderStage(); }, 500);
+  peek.h = later(() => { S.peek = ''; renderStage(); }, 4000);
+}
 
 const stage = document.getElementById('stage');
-stage.addEventListener('contextmenu', ev => { if (ev.target.closest('.tm-item')) { ev.preventDefault(); openMenu(); } });
+stage.addEventListener('contextmenu', ev => { if (ev.target.closest('.tm-item')) { ev.preventDefault(); peek(); } });
 stage.addEventListener('mouseover', ev => { if (ev.target.closest('.tm-item')) emit('hover'); });
 
 /* Clicks inside the pretend Mac */
@@ -413,25 +430,21 @@ stage.addEventListener('click', ev => {
   const el = ev.target.closest('[data-act]');
   if (!el) {
     if (S.panel && !ev.target.closest('.tm-panel, .tm-practice')) { S.panel = false; renderStage(); emit('panel-close'); }
-    else if (S.menu && !ev.target.closest('.tm-ctx, .tm-practice')) { S.menu = false; renderStage(); }
     return; }
   const a = el.dataset.act, id = el.dataset.id;
   switch (a) {
-    case 'item': if (ev.ctrlKey) { openMenu(); break; }
-      set({ menu: false, panel: !S.panel }); if (S.panel) set({ settings: false }); renderStage(); emit(S.panel ? 'panel-open' : 'panel-close'); break;
+    case 'item': if (ev.ctrlKey) { peek(); break; }
+      set({ panel: !S.panel }); if (S.panel) set({ settings: false }); renderStage(); emit(S.panel ? 'panel-open' : 'panel-close'); break;
     case 'gear': set({ panel: false, settings: true, spage: 'settings' }); renderStage(); emit('settings'); break;
     case 'row': set({ panel: false }); renderStage(); toast('Triathlon opens that session (practice copy)'); emit('row', id); break;
     case 'open-tri': set({ panel: false }); renderStage(); toast('Triathlon comes to the front (practice copy)'); emit('open-tri'); break;
-    case 'm-open': set({ menu: false }); renderStage(); toast('Triathlon comes to the front (practice copy)'); emit('open-tri'); break;
-    case 'm-refresh': set({ menu: false }); renderStage(); toast('Reading the note and asking the Board again'); emit('refresh'); break;
-    case 'm-settings': set({ menu: false, settings: true, spage: 'settings' }); renderStage(); emit('settings'); break;
     case 'spage': S.spage = el.dataset.p; renderStage(); emit('tab', S.spage); break;
     case 'close-settings': S.settings = false; renderStage(); emit('settings-close'); break;
     case 'sw': { const k = el.dataset.k; S[k] = !S[k]; renderStage(); emit('sw', { k, on: S[k] }); break; }
     case 'refresh':
       if (S.busy) break;
       S.busy = true; renderStage(); emit('refresh'); later(() => { S.busy = false; renderStage(); }, 1500); break;
-    case 'p-rclick': openMenu(); break;
+    case 'p-rclick': peek(); break;
     case 'p-write': S.note = true; renderStage(); emit('note-written'); break;
     case 'p-log': S.sessions = S.sessions.map(s => s.key === 'run' ? { ...s, state: 'done' } : s); S.week = '1 h 25 min done of 3 h 35 min planned'; S.weekShare = 85 / 215; renderStage(); emit('logged'); break;
     case 'p-noboard': S.src = 'triathlon'; renderStage(); emit('src', 'triathlon'); break;
@@ -442,7 +455,6 @@ stage.addEventListener('click', ev => {
 document.addEventListener('keydown', ev => {
   if (ev.key !== 'Escape') return;
   if (S.settings) { S.settings = false; renderStage(); emit('settings-close'); }
-  else if (S.menu) { S.menu = false; renderStage(); }
   else if (S.panel) { S.panel = false; renderStage(); emit('panel-close'); }
 });
 
@@ -451,11 +463,11 @@ const PANEL = { panel: true };
 const SETTINGS_ON = { settings: true, spage: 'settings' };
 const LESSONS = [
   { title: 'The wave in the menu bar', icon: 'wave', steps: [
-    { kind: 'look', head: 'One small icon', text: 'The training wave: the line with three blocks from the icon of AMS Triathlon Training. Nothing stands beside it, and the app has no Dock icon. It only reads; it never changes your plan.', target: 'item', setup: () => scene({}) },
-    { kind: 'look', head: 'Green and grey', text: 'The wave is green while the app has today’s note from Triathlon. It is grey while there is no note for today yet. It does not change with the session, and there is no number beside it.', target: 'item', setup: () => scene({ note: false }) },
+    { kind: 'look', head: 'One small icon', text: 'The training wave: a thin line with two blocks, drawn small. Nothing stands beside it, and the app has no Dock icon. It only reads; it never changes your plan.', target: 'item', setup: () => scene({}) },
+    { kind: 'look', head: 'Pale green and grey', text: 'The wave is pale green while the app has today’s note from Triathlon. It is grey while there is no note for today yet. It does not change with the session, and there is no number beside it.', target: 'item', setup: () => scene({ note: false }) },
     { kind: 'try', head: 'Point at the wave', text: 'Move the pointer onto the wave and wait a moment.', target: 'item', setup: () => scene({}), wait: 'hover', ok: 'It says the sessions in words, here “Swim 40 min, done · Run 45 min, to do”, and under that “Body Battery 44”. A click opens the panel.' },
-    { kind: 'try', head: 'A grey wave turns green', text: 'There is no note for today yet. Triathlon writes it when it opens. In the practice box, press “Triathlon writes today’s note”.', hint: 'With “Open Triathlon quietly” on, the real app opens Triathlon in the background for you.', target: 'p-write', setup: () => scene({ note: false, practice: ['write'] }), wait: 'note-written', ok: 'The wave is green now. The Mac’s own words said “No note for today yet” before.' },
-    { kind: 'try', head: 'Right-click the wave', text: 'Right-click the wave, or hold the control key and click it.', hint: 'No right button? The practice box has a button for it.', target: 'item', setup: () => scene({ practice: ['rclick'] }), wait: 'menu-open', ok: 'A short menu: “Open Triathlon”, “Refresh now” and “Settings…”. “Refresh now” reads and asks again at once.' },
+    { kind: 'try', head: 'A grey wave turns green', text: 'There is no note for today yet. Triathlon writes it when it opens. In the practice box, press “Triathlon writes today’s note”.', hint: 'With “Open Triathlon quietly” on, the real app opens Triathlon in the background for you.', target: 'p-write', setup: () => scene({ note: false, practice: ['write'] }), wait: 'note-written', ok: 'The wave is pale green now. The Mac’s own words said “No note for today yet” before.' },
+    { kind: 'try', head: 'Right-click the wave (the Peek)', text: 'Right-click the wave, or hold the control key and click it.', hint: 'No right button? The practice box has a button for it.', target: 'item', setup: () => scene({ practice: ['rclick'] }), wait: 'peek', ok: 'There is no menu. The wave rolled once, the app asked for fresh numbers at once, and for 4 seconds words stood beside the wave: the next session and your Body Battery, here “Run 45 min · 62”. Then they folded away. A second right-click while the words show starts the 4 seconds again.' },
     { kind: 'check', head: 'Quick check', text: 'The wave in the menu bar is grey. What does that mean?', answers: ['There is no note for today yet', 'Your Body Battery is low', 'It is a rest day'], right: 0, ok: 'Right. A rest day still has a note, so the wave stays green. Grey is never red; it only says nothing is known.', setup: () => scene({ note: false }) },
   ]},
   { title: 'The panel', icon: 'panel', steps: [
@@ -475,21 +487,21 @@ const LESSONS = [
     { kind: 'look', head: 'The curve', text: 'Today is a white line with a dot at the newest reading, and the ground under it is softly filled. Yesterday is a thin dark plum line with the word “yesterday”. It runs from midnight to midnight: the figures 06, 12 and 18 are the hours. The bottom line is 0, the top of the card is 100.', target: 'curve', setup: () => scene(PANEL) },
     { kind: 'try', head: 'The Garmin Board stops', text: 'The numbers come from your AMS Garmin Bridge Board on this Mac. In the practice box, press “The Garmin Board stops answering”.', target: 'p-noboard', setup: () => scene({ panel: true, practice: ['noboard'] }), wait: 'src', when: d => d === 'triathlon', ok: 'The small words now say “as Triathlon last read it”: the app uses the reading Triathlon saved. If neither is there you see a dash and “Garmin Board not answering”.' },
     { kind: 'try', head: 'Before the first sync', text: 'In the practice box, press “Early morning: the watch has not synced yet”.', target: 'p-nosync', setup: () => scene({ panel: true, practice: ['nosync'] }), wait: 'src', when: d => d === 'waiting', ok: 'A dash and “no reading yet today”. The app never shows yesterday’s number as today’s.' },
-    { kind: 'try', head: 'Open Triathlon', text: 'Press the green button “Open Triathlon”.', target: 'openbtn', setup: () => scene(PANEL), wait: 'open-tri', ok: 'It brings AMS Triathlon Training to the front. The same button is in the right-click menu. It is full colour because it is the main thing to do here.' },
+    { kind: 'try', head: 'Open Triathlon', text: 'Press the green button “Open Triathlon”.', target: 'openbtn', setup: () => scene(PANEL), wait: 'open-tri', ok: 'It brings AMS Triathlon Training to the front. It is full colour because it is the main thing to do here.' },
     { kind: 'check', head: 'Quick check', text: 'The number shows a dash and the words “no reading yet today”. Why?', answers: ['The watch has not synced since midnight', 'Your Body Battery is zero', 'Triathlon is not installed'], right: 0, ok: 'Right. Body Battery only changes when the watch syncs, so the line has few corners.', setup: () => scene({ panel: true, src: 'waiting' }) },
   ]},
   { title: 'Settings, How it works, What’s new', icon: 'gear', steps: [
-    { kind: 'try', head: 'Open Settings', text: 'Press the gear in the panel.', target: 'gear', setup: () => scene(PANEL), wait: 'settings', ok: 'Settings opens in its own window with three tabs. “Settings…” in the right-click menu opens the same window.' },
+    { kind: 'try', head: 'Open Settings', text: 'Press the gear in the panel.', target: 'gear', setup: () => scene(PANEL), wait: 'settings', ok: 'Settings opens in its own window with three tabs.' },
     { kind: 'look', head: 'The Settings tab', text: '“Open at login” (the app also comes back by itself if it ever stops unexpectedly), “Open Triathlon quietly”, and the section “Where the figures come from” with two lines: today’s note, and Body Battery.', target: 'sec-figures', setup: () => scene(SETTINGS_ON) },
     { kind: 'try', head: 'Open Triathlon quietly', text: 'It is on at first. Switch it off.', hint: 'Triathlon writes today’s note only when it opens. On: the app opens it hidden, never in front, when there is no note, and again every 30 minutes while a session is to do. Off: the wave stays grey until you open Triathlon yourself.', target: 'sw-quiet', setup: () => scene(SETTINGS_ON), wait: 'sw', when: d => d.k === 'quiet' && !d.on, ok: 'Off. Switch it on again if you want the note to arrive by itself.' },
-    { kind: 'try', head: 'Refresh now', text: 'Press “Refresh now” under “Where the figures come from”.', target: 'refresh', setup: () => scene(SETTINGS_ON), wait: 'refresh', ok: 'The app reads again and asks the Garmin Board at once. It says “Refreshing…” for a moment. It works even with the quiet switch off.' },
+    { kind: 'try', head: 'Refresh now', text: 'Press “Refresh now” under “Where the figures come from”.', target: 'refresh', setup: () => scene(SETTINGS_ON), wait: 'refresh', ok: 'The app reads again and asks the Garmin Board at once. It says “Refreshing…” for a moment. It works even with the quiet switch off. A right-click on the wave (the Peek) asks for fresh numbers too.' },
     { kind: 'try', head: 'How it works', text: 'Press the tab “How it works”.', target: 'tab-guide', setup: () => scene(SETTINGS_ON), wait: 'tab', when: d => d === 'guide', ok: 'A guide to the whole app, in short parts such as “The panel” and “Open Triathlon quietly”, and at the end “Signs in this app”.' },
-    { kind: 'try', head: 'What’s new', text: 'Press the tab “What’s new”.', target: 'tab-news', setup: () => scene({ ...SETTINGS_ON, spage: 'guide' }), wait: 'tab', when: d => d === 'news', ok: 'Every version, newest first, with what was before and what is now. The version also shows at the bottom: “Version 0.3.3 (6)”.' },
+    { kind: 'try', head: 'What’s new', text: 'Press the tab “What’s new”.', target: 'tab-news', setup: () => scene({ ...SETTINGS_ON, spage: 'guide' }), wait: 'tab', when: d => d === 'news', ok: 'Every version, newest first, with what was before and what is now. The version also shows at the bottom: “Version 0.4 (8)”.' },
     { kind: 'try', head: 'Done', text: 'Press the green “Done” button.', hint: 'The Escape key closes the window too. “Quit AMS Tria Menu” is beside it.', target: 'done', setup: () => scene({ ...SETTINGS_ON, spage: 'news' }), wait: 'settings-close', ok: 'The window closes. Only one copy of the app runs.' },
   ]},
   { title: 'Signs in this app', icon: 'flag', steps: [
     { kind: 'look', head: 'The list in the guide', text: 'The tab “How it works” ends with “Signs in this app”: every mark and colour that means something, each drawn as it looks. This chapter walks through them.', target: 'signs', setup: () => scene({ ...SETTINGS_ON, spage: 'guide' }) },
-    { kind: 'look', head: 'The wave', text: 'Green wave: the app has today’s note from Triathlon. Grey wave: no note for today yet. Grey means nothing is known. Grey is never red.', target: 'item', setup: () => scene({}) },
+    { kind: 'look', head: 'The wave', text: 'Pale green wave: the app has today’s note from Triathlon. Grey wave: no note for today yet. Grey means nothing is known. Grey is never red. Words beside the wave for 4 seconds: you right-clicked; the next session and Body Battery, for example “Run 45 min · 62”. They fold away by themselves.', target: 'item', setup: () => scene({}) },
     { kind: 'look', head: 'Headings and the bar', text: 'Green heading: today. Blue heading: tomorrow. Purple heading: this week, with the slim purple bar for how much of the planned time is done.', target: 'week', setup: () => scene(PANEL) },
     { kind: 'look', head: 'Marks in the rows', text: 'A sport’s mark has the sport’s colour: swim blue, bike yellow, run green, strength orange, rowing teal, mobility purple, race red. Filled pill “to do”: still to do. Tick with “done”: done, and nothing else is ever a tick. Grey “missed”: planned for today and not done. Moon: a rest day.', target: 'row-bike', setup: () => scene({ panel: true, sessions: [{ ...SWIM }, { ...RUN }, { ...BIKE }] }) },
     { kind: 'look', head: 'The pink card and the button', text: 'Pink: Body Battery. White line with a dot: today so far, the dot is the newest reading. Thin dark line: yesterday. A button in full colour is the main thing to do on that screen.', target: 'bcard', setup: () => scene(PANEL) },
@@ -582,7 +594,7 @@ function renderFinish() {
   const items = ['Rest the pointer on the wave in your menu bar and read the words: the sessions, and Body Battery.',
     'Click the wave and read the panel from top to bottom: Today, Tomorrow, This week, and the pink Body Battery card.',
     'Click a session row and see it open in AMS Triathlon Training. Come back with the wave.',
-    'Right-click (or control-click) the wave and look for “Open Triathlon”, “Refresh now” and “Settings…”.',
+    'Right-click (or control-click) the wave and watch: it rolls once, and for 4 seconds words stand beside it, the next session and Body Battery.',
     'Open Settings with the gear. Look at “Open at login” and “Open Triathlon quietly” and decide which you want.',
     'Press “Refresh now” and read the two lines under “Where the figures come from”.',
     'Read “How it works”, down to “Signs in this app”, and look at “What’s new”.',

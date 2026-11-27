@@ -3,8 +3,9 @@ import Combine
 import SwiftUI
 import TriaMenuCore
 
-/// The item in the menu bar: one icon, the training wave of AMS Triathlon Training's app icon (0.3, his own
-/// pick: "make it like this"), and the panel under it. Green while the app has today's note, grey without.
+/// The item in the menu bar: one icon, two blocks of the training wave of AMS Triathlon Training's app icon
+/// (0.4: thin and pale green, his pick), and the panel under it. Green while the app has today's note, grey without.
+/// A right-click is the peek: the wave rolls once and a few words stand beside it for four seconds.
 final class StatusItemController: NSObject, NSPopoverDelegate {
     private var item: NSStatusItem!
     private var placeTimer: Timer?
@@ -14,7 +15,13 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
     private let popover = NSPopover()
     private let model: AppModel
     private var bag = Set<AnyCancellable>()
-    private var drawnKnown: Bool?
+    private var drawnKey = ""
+    /// The peek: words beside the wave until this timer ends.
+    private var peekOn = false
+    private var peekEnd: Timer?
+    private var rollTimer: Timer?
+    private var rollPhase: CGFloat?
+    private var peekRefreshed: Date?
     /// The app that had the keyboard when the panel opened; it gets it back when the panel closes.
     private var previousApp: NSRunningApplication?
     private var outsideClicks: Any?
@@ -106,51 +113,53 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         }
     }
 
-    /// A left click opens the panel; a right click or control-click shows the short menu.
+    /// A left click opens the panel; a right click or control-click is the peek.
     @objc private func clicked() {
         let event = NSApp.currentEvent
         if event?.type == .rightMouseUp || event?.modifierFlags.contains(.control) == true {
-            if popover.isShown { popover.performClose(nil) }
-            item.menu = makeMenu()
-            item.button?.performClick(nil)
-            item.menu = nil
+            peek()
         } else {
             toggle()
         }
     }
 
-    /// For checks: the right-click menu, closed again by itself after four seconds.
-    func showMenuForCheck() {
-        let menu = makeMenu()
-        let close = Timer(timeInterval: 4, repeats: false) { _ in menu.cancelTracking() }
-        RunLoop.main.add(close, forMode: .common)
-        item.menu = menu
-        item.button?.performClick(nil)
-        item.menu = nil
-    }
-
-    /// Titles of the right-click menu, in order (a separator between the second and the third).
-    static let rightMenuTitles = ["Open Triathlon", "Refresh now", "Settings\u{2026}"]
-
-    private func makeMenu() -> NSMenu {
-        let menu = NSMenu()
-        let t = Self.rightMenuTitles
-        let open = NSMenuItem(title: t[0], action: #selector(rightOpen), keyEquivalent: "")
-        open.setAccessibilityIdentifier("triaMenuRightOpen")
-        let refresh = NSMenuItem(title: t[1], action: #selector(rightRefresh), keyEquivalent: "")
-        refresh.setAccessibilityIdentifier("triaMenuRightRefresh")
-        let settings = NSMenuItem(title: t[2], action: #selector(rightSettings), keyEquivalent: "")
-        settings.setAccessibilityIdentifier("triaMenuRightSettings")
-        for entry in [open, refresh, .separator(), settings] {
-            entry.target = self
-            menu.addItem(entry)
+    /// The peek (0.4; a short menu before): the wave rolls once, the app fetches fresh numbers, and for four
+    /// seconds the next session and Body Battery stand beside the wave. Also what the check hook does.
+    func peek() {
+        if popover.isShown { popover.performClose(nil) }
+        let now = Date()
+        if Peek.refreshes(lastRefresh: peekRefreshed, now: now) {
+            peekRefreshed = now
+            model.refreshNow()
         }
-        return menu
+        Diary.note("Peek: \(Words.peek(note: model.note, battery: model.body.latest))")
+        peekOn = true
+        peekEnd?.invalidate()
+        let end = Timer(timeInterval: Peek.seconds, repeats: false) { [weak self] _ in
+            self?.peekOn = false
+            self?.redraw(force: true)
+        }
+        RunLoop.main.add(end, forMode: .common)
+        peekEnd = end
+        rollTimer?.invalidate()
+        let start = Date()
+        rollPhase = 0
+        let roll = Timer(timeInterval: 1.0 / 30, repeats: true) { [weak self] timer in
+            guard let self else { timer.invalidate(); return }
+            let phase = Date().timeIntervalSince(start) / Peek.rollSeconds
+            if phase >= 1 {
+                timer.invalidate()
+                self.rollTimer = nil
+                self.rollPhase = nil
+            } else {
+                self.rollPhase = CGFloat(phase)
+            }
+            self.redraw(force: true)
+        }
+        RunLoop.main.add(roll, forMode: .common)
+        rollTimer = roll
+        redraw(force: true)
     }
-
-    @objc private func rightOpen() { model.openTriathlon() }
-    @objc private func rightRefresh() { model.refreshNow() }
-    @objc private func rightSettings() { openSettingsAction() }
 
     /// Opens or closes the panel. The panel does not come to the front: the app you work in keeps the keyboard.
     @objc func toggle() {
@@ -185,20 +194,38 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         if button.toolTip != words { button.toolTip = words }
         button.setAccessibilityLabel(words.replacingOccurrences(of: "\n", with: ". "))
         let known = model.note != nil
-        guard force || drawnKnown != known else { return }
-        drawnKnown = known
-        button.image = Self.image(known: known)
+        let shown = peekOn ? (Words.peekSession(model.note), Words.number(model.body.latest)) : nil
+        let key = "\(known)|\(shown?.0 ?? "")|\(shown?.1 ?? "")|\(rollPhase.map { Int($0 * 1000) } ?? -1)"
+        guard force || key != drawnKey else { return }
+        drawnKey = key
+        let image = Self.image(known: known, peek: shown, roll: rollPhase)
+        button.image = image
+        item.length = image.size.width + Self.edgeRoom
     }
 
-    /// The wave for the menu bar. Its colour settles when the Mac draws it, so one picture is right by day
-    /// and by night. A little wider than tall, like the wave itself.
-    static func image(known: Bool) -> NSImage {
-        let side: CGFloat = 20
-        let image = NSImage(size: NSSize(width: side, height: 18), flipped: false) { rect in
+    /// Room left and right of the picture, together (0.4: 6; the Mac's own 8 before).
+    static let edgeRoom: CGFloat = 6
+    static let peekSize: CGFloat = 11
+
+    /// The wave for the menu bar, with the peek words beside it while they show. Its colours settle when the
+    /// Mac draws it, so one picture is right by day and by night.
+    static func image(known: Bool, peek: (session: String, battery: String)? = nil, roll: CGFloat? = nil) -> NSImage {
+        let height: CGFloat = 18, gap: CGFloat = 5
+        let font = NSFont.systemFont(ofSize: peekSize, weight: .medium)
+        let line = NSMutableAttributedString()
+        if let peek {
+            line.append(NSAttributedString(string: peek.session, attributes: [.font: font, .foregroundColor: Palette.inkNS]))
+            line.append(NSAttributedString(string: " \u{00B7} ", attributes: [.font: font, .foregroundColor: Palette.greyNS]))
+            // Body Battery's own colour, as on its card in the panel.
+            line.append(NSAttributedString(string: peek.battery, attributes: [.font: NSFont.systemFont(ofSize: peekSize, weight: .semibold),
+                                                                               .foregroundColor: Palette.bodyNS]))
+        }
+        let textSize = line.size()
+        let width = MenuWave.width + (peek == nil ? 0 : gap + ceil(textSize.width) + 1)
+        let image = NSImage(size: NSSize(width: width, height: height), flipped: false) { rect in
             guard let context = NSGraphicsContext.current?.cgContext else { return false }
-            // A heavier line than in the panel: the wave of the app icon is a bold one.
-            Mark.wave.draw(in: CGRect(x: 0, y: (rect.height - side) / 2, width: side, height: side),
-                           color: known ? Palette.waveNS : Palette.greyNS, context: context, stroke: 2.3)
+            MenuWave.draw(x: 0, midY: rect.midY, color: known ? Palette.waveNS : Palette.greyNS, roll: roll, context: context)
+            if peek != nil { line.draw(at: NSPoint(x: MenuWave.width + gap, y: (height - textSize.height) / 2)) }
             return true
         }
         image.isTemplate = false

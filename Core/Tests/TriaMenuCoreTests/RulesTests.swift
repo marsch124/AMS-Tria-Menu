@@ -63,6 +63,26 @@ final class RulesTests: XCTestCase {
         XCTAssertEqual(Week.share(done: 300, planned: 215), 1)
     }
 
+    func testPeekWords() {
+        let note = note()!
+        XCTAssertEqual(Words.peek(note: note, battery: 62), "Run 45 min \u{00B7} 62")
+        XCTAssertEqual(Words.peek(note: nil, battery: nil), "No note yet \u{00B7} \u{2013}")
+        var done = note
+        done.sessions[0].state = .done
+        XCTAssertEqual(Words.peekSession(done), "Done")
+        var missed = note
+        missed.sessions = [.init(key: "a", sport: "run", sportWord: "Run", state: .missed)]
+        XCTAssertEqual(Words.peekSession(missed), "Missed")
+        var rest = note
+        rest.sessions = [.init(key: "r", sport: "rest", sportWord: "Rest", state: .rest)]
+        XCTAssertEqual(Words.peekSession(rest), "Rest day")
+        rest.sessions = []
+        XCTAssertEqual(Words.peekSession(rest), "Rest day")
+        XCTAssertTrue(Peek.refreshes(lastRefresh: nil, now: at("2026-12-01T10:00:00Z")))
+        XCTAssertFalse(Peek.refreshes(lastRefresh: at("2026-12-01T09:59:30Z"), now: at("2026-12-01T10:00:00Z")))
+        XCTAssertTrue(Peek.refreshes(lastRefresh: at("2026-12-01T09:59:00Z"), now: at("2026-12-01T10:00:00Z")))
+    }
+
     func testReadsTheBoardAndTriathlonsOwnReading() {
         let board = BoardBody.read(Data("""
         {"ok":true,"date":"2026-12-01","today":{"bodyBattery":{"latest":44,"min":44,"max":77}},

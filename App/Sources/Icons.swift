@@ -135,14 +135,82 @@ enum Palette {
     static func yesterday(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0x45082A : 0x4E0A2C) }
     static func pale(_ color: Color, _ scheme: ColorScheme) -> Color { color.opacity(scheme == .dark ? 0.22 : 0.14) }
 
-    /// The wave in the menu bar while the app has today's note: the green of Triathlon's app icon.
+    /// The wave in the menu bar while the app has today's note: a pale green (0.4, his pick 3 of four;
+    /// the green of Triathlon's app icon, 01C97B / 00875A, before).
     static let waveNS = NSColor(name: nil) { appearance in
         appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-            ? NSColor(srgbRed: 0.004, green: 0.79, blue: 0.48, alpha: 1) : NSColor(srgbRed: 0, green: 0.53, blue: 0.35, alpha: 1)
+            ? NSColor(srgbRed: 0x8B / 255.0, green: 0xE8 / 255.0, blue: 0xC2 / 255.0, alpha: 1)
+            : NSColor(srgbRed: 0x35 / 255.0, green: 0xA8 / 255.0, blue: 0x82 / 255.0, alpha: 1)
+    }
+    static func wave(_ scheme: ColorScheme) -> Color { Color(hex: scheme == .dark ? 0x8BE8C2 : 0x35A882) }
+    /// Words in the menu bar (the peek).
+    static let inkNS = NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(white: 1, alpha: 0.92) : NSColor(white: 0, alpha: 0.85)
+    }
+    /// Body Battery's pink, for its number in the menu bar.
+    static let bodyNS = NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(srgbRed: 0xF4 / 255.0, green: 0x72 / 255.0, blue: 0xB6 / 255.0, alpha: 1)
+            : NSColor(srgbRed: 0xC2 / 255.0, green: 0x1E / 255.0, blue: 0x6E / 255.0, alpha: 1)
     }
     /// Grey: no note for today.
     static let greyNS = NSColor(name: nil) { appearance in
         appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(white: 0.66, alpha: 1) : NSColor(white: 0.45, alpha: 1)
+    }
+}
+
+/// The wave of the menu bar item (0.4): two blocks of the training wave, a thin line. It is drawn from its
+/// corner points, so it can roll: a small lift runs through it from left to right.
+/// (A mark for this one screen; the three-block wave of the tile comes from the icon library.)
+enum MenuWave {
+    /// The corners on the 24-point grid (y pointing down), centred on 12.
+    static let points: [CGPoint] = [
+        CGPoint(x: 5.92, y: 16.05), CGPoint(x: 7.31, y: 7.95), CGPoint(x: 9.85, y: 7.95), CGPoint(x: 11.24, y: 16.05),
+        CGPoint(x: 12.76, y: 16.05), CGPoint(x: 14.15, y: 7.95), CGPoint(x: 16.69, y: 7.95), CGPoint(x: 18.08, y: 16.05),
+    ]
+    static let stroke: CGFloat = 1.5
+    /// Points on the screen for one grid step: the same size as the three-block wave had.
+    static let unit: CGFloat = 20.0 / 24.0
+    /// Room the wave takes, its line included.
+    static let width: CGFloat = 12
+
+    /// The corners while the wave rolls (`roll` from 0 to 1), or at rest.
+    static func corners(roll: CGFloat?) -> [CGPoint] {
+        guard let roll else { return points }
+        let crest = (5.92 - 4) + roll * (18.08 - 5.92 + 8)
+        return points.map { point in
+            let away = (point.x - crest) / 2.6
+            return CGPoint(x: point.x, y: point.y - 2.4 * exp(-away * away))
+        }
+    }
+
+    /// Draws it into an AppKit drawing (y pointing up): `x` is its left edge, `midY` its middle line.
+    static func draw(x: CGFloat, midY: CGFloat, color: NSColor, roll: CGFloat? = nil, context: CGContext) {
+        let left = x + (width - (18.08 - 5.92) * unit) / 2
+        let spots = corners(roll: roll).map { CGPoint(x: left + ($0.x - 5.92) * unit, y: midY + (12 - $0.y) * unit) }
+        context.saveGState()
+        context.addLines(between: spots)
+        context.setStrokeColor(color.cgColor)
+        context.setLineWidth(stroke * unit)
+        context.setLineCap(.round)
+        context.setLineJoin(.round)
+        context.strokePath()
+        context.restoreGState()
+    }
+}
+
+/// The same wave as a view, for "Signs in this app".
+struct MenuWaveView: View {
+    var body: some View {
+        Canvas { context, size in
+            var path = Path()
+            let u = MenuWave.unit
+            let spots = MenuWave.points.map { CGPoint(x: size.width / 2 + ($0.x - 12) * u, y: size.height / 2 + ($0.y - 12) * u) }
+            path.addLines(spots)
+            context.stroke(path, with: .foreground, style: StrokeStyle(lineWidth: MenuWave.stroke * u, lineCap: .round, lineJoin: .round))
+        }
+        .frame(width: 20, height: 18)
+        .accessibilityHidden(true)
     }
 }
 

@@ -159,6 +159,22 @@ public enum Words {
         return parts.joined(separator: "\n")
     }
 
+    /// What a right-click shows beside the wave: the first session still to do; with nothing left "Done";
+    /// only missed ones "Missed"; a rest day or nothing planned "Rest day"; without a note "No note yet".
+    public static func peekSession(_ note: TodayNote?) -> String {
+        guard let note else { return "No note yet" }
+        let real = note.sessions.filter { $0.state != .rest }
+        if let next = real.first(where: { $0.state == .todo }) { return session(next) }
+        if real.contains(where: { $0.state == .done }) { return "Done" }
+        if real.contains(where: { $0.state == .missed }) { return "Missed" }
+        return "Rest day"
+    }
+
+    /// The whole peek line: the session, a middle dot, the Body Battery number.
+    public static func peek(note: TodayNote?, battery: Int?) -> String {
+        peekSession(note) + " \u{00B7} " + number(battery)
+    }
+
     /// "watch synced 15:09", or with the day when it was not today.
     public static func synced(_ date: Date?, now: Date, calendar: Calendar = .current) -> String {
         guard let date else { return "" }
@@ -176,5 +192,20 @@ public enum Week {
     public static func share(done: Int?, planned: Int?) -> Double? {
         guard let done, let planned, planned > 0 else { return nil }
         return min(max(Double(done) / Double(planned), 0), 1)
+    }
+}
+
+/// The peek: a right-click on the wave shows a few words beside it for a short while.
+public enum Peek {
+    /// How long the words stay.
+    public static let seconds: Double = 4
+    /// How long the wave takes to roll once.
+    public static let rollSeconds: Double = 0.6
+    /// A right-click fetches fresh numbers, but not more often than this (one Board answer costs many Garmin calls).
+    public static let refreshGap: Double = 60
+
+    public static func refreshes(lastRefresh: Date?, now: Date) -> Bool {
+        guard let lastRefresh else { return true }
+        return now.timeIntervalSince(lastRefresh) >= refreshGap
     }
 }
